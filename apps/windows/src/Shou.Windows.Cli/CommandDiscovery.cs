@@ -53,10 +53,10 @@ internal static class CommandDiscovery
         new("rules disable", "configuration", ["rule-id", "workspace"], ["version"], [], "Disable an explicit rule binding without changing target files."),
         new("rules preview", "snapshot", ["file", "workspace"], ["max-entries", "max-seconds", "max-depth"], [], "Scan a draft and persist bounded review evidence without granting execution."),
         new("scan", "snapshot", ["workspace"], ["max-entries", "max-seconds", "max-depth"], [], "Scan the workspace with bundled and explicitly enabled personal rules and save current evidence; does not change targets."),
-        new("scan results", "read", ["scan-id"], ["limit", "cursor"], [], "Page through immutable saved scan candidates; execution remains unavailable."),
+        new("scan results", "read", ["scan-id"], ["limit", "cursor"], [], "Page through immutable saved scan candidates and current rule-cleanup availability; results do not grant execution."),
         new("plan create", "plan", ["scan-id", "candidate"], ["mode"], ["candidate"], "Create a fixed plan from explicitly selected candidate IDs. Mode defaults to trash, which is currently unavailable; permanent requires explicit selection."),
         new("plan show", "read", ["plan-id"], [], [], "Read a saved immutable plan without granting confirmation or execution."),
-        new("plan execute", "destructive", ["plan-id"], [], [], "Execute a current plan only after native acceptance and interactive current-scope confirmation.", CliServices.MutationAvailable, CliServices.MutationAvailable ? null : "native_acceptance_pending"),
+        new("plan execute", "destructive", ["plan-id"], [], [], "Execute a current permanent rule-cleanup plan on native Windows 11 x64 after interactive current-scope confirmation; storage-removal plans are unavailable.", CliServices.MutationAvailable, CliServices.MutationAvailable ? null : "native_windows_x64_required"),
         new("history list", "read", [], ["limit", "cursor"], [], "Page through bounded journal summaries; full plan verification requires history show."),
         new("history show", "read", ["execution-id"], [], [], "Read an execution journal and verify its binding to the saved plan."),
         new("history inspect", "read", ["execution-id"], ["max-entries", "max-seconds"], [], "Observe exact recorded original and Trash locations; never changes logs, retries operations or restores files.")

@@ -8,7 +8,7 @@ public sealed record DesktopUpdate(string Version, string Notes, Uri DownloadUrl
 {
     public const int MaximumMetadataBytes = 1_048_576;
 
-    public static DesktopUpdate Parse(byte[] bytes, string currentVersion, string architecture)
+    public static DesktopUpdate Parse(byte[] bytes, string currentVersion, string architecture, bool installed = false)
     {
         if (bytes.Length > MaximumMetadataBytes || architecture is not ("x64" or "arm64")) throw Invalid();
         try
@@ -21,13 +21,12 @@ public sealed record DesktopUpdate(string Version, string Notes, Uri DownloadUrl
             var current = ParseVersion(currentVersion);
             var prefix = "https://github.com/limecloud/shou/releases/";
             if (release.GetProperty("html_url").GetString() != prefix + "tag/" + tag) throw Invalid();
-            var filename = $"Shou-{version}-windows-{architecture}.zip";
+            var filename = $"Shou-{version}-windows-{architecture}" + (installed ? "-Setup.exe" : ".zip");
             var download = prefix + $"download/{tag}/{filename}";
             var matches = release.GetProperty("assets").EnumerateArray().Where(asset =>
-                asset.GetProperty("name").GetString() == filename &&
-                asset.GetProperty("browser_download_url").GetString() == download &&
-                asset.GetProperty("size").GetInt64() > 0).ToArray();
-            if (matches.Length != 1) throw Invalid();
+                asset.GetProperty("name").GetString() == filename).ToArray();
+            if (matches.Length != 1 || matches[0].GetProperty("browser_download_url").GetString() != download ||
+                matches[0].GetProperty("size").GetInt64() <= 0) throw Invalid();
             var notes = release.TryGetProperty("body", out var body) && body.ValueKind == JsonValueKind.String ? body.GetString() ?? "" : "";
             if (notes.Length > 65_536) notes = notes[..65_536];
             return new(version.ToString(), notes, new Uri(download), version > current);

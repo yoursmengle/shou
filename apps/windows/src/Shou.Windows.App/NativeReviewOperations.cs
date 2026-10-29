@@ -14,7 +14,7 @@ internal sealed class NativeReviewOperations : ICleanupReviewOperations, ICleanu
     private readonly CleanupHistoryService history;
     private readonly ScanLocationService locations;
     public BuiltinRuleCatalog Catalog { get; }
-    public bool ExecutionAvailable => WindowsCleanupMutation.PublicExecutionAvailable;
+    public bool ExecutionAvailable => WindowsCleanupMutation.PublicRuleCleanupAvailable;
 
     public NativeReviewOperations()
     {
@@ -31,7 +31,7 @@ internal sealed class NativeReviewOperations : ICleanupReviewOperations, ICleanu
         var protection = new CleanupProtectionContext(store.OwnerSid, WindowsPath.Parse(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)), store.Directory, system);
         configuration = new(store, validator, files, store.OwnerSid, catalog: catalog);
         scans = new(store, validator, scanner, protection, catalog: catalog);
-        cleanup = new(store, validator, scanner, protection, new WindowsCleanupActivity(), new WindowsCleanupMutation(), catalog: catalog, storageFiles: files);
+        cleanup = new(store, validator, scanner, protection, new WindowsCleanupActivity(), new WindowsCleanupMutation(), catalog: catalog);
         history = new(store, validator, files, scanner, store.OwnerSid);
         locations = new(configuration, catalog, files, store.OwnerSid);
     }
@@ -68,6 +68,7 @@ internal sealed class NativeReviewOperations : ICleanupReviewOperations, ICleanu
         if (!ExecutionAvailable) throw new ShouException("unsupported_capability", "Cleanup execution requires a matching native Windows 11 process.");
         return Task.Run(async () =>
         {
+            WindowsCleanupMutation.RequirePublicRulePlan(await cleanup.PlanAsync(planId, cancellationToken).ConfigureAwait(false));
             var consent = await cleanup.ConfirmAsync(planId, confirmation, cancellationToken).ConfigureAwait(false);
             return await cleanup.ExecuteAsync(planId, consent, progress, cancellationToken).ConfigureAwait(false);
         }, cancellationToken);

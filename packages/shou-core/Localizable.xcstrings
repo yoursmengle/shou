@@ -11894,6 +11894,22 @@
         }
       }
     },
+    "Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载安装程序。完成当前操作并退出 Shou 后，再运行安装程序。配置和历史会保留。"
+          }
+        }
+      }
+    },
     "Draft preview only. Enable the rule and rescan before cleanup.": {
       "localizations": {
         "en": {
@@ -28987,6 +29003,22 @@
         }
       }
     },
+    "Rule cleanup requires a native Windows 11 x64 process.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rule cleanup requires a native Windows 11 x64 process."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "规则清理需要在 Windows 11 x64 上原生运行。"
+          }
+        }
+      }
+    },
     "Rule does not conform to the bundled schema.": {
       "localizations": {
         "en": {
@@ -33572,6 +33604,22 @@
         }
       }
     },
+    "Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分位置未能完整扫描。完整且无阻断的项目仍可选择清理。"
+          }
+        }
+      }
+    },
     "Some login items and embedded helpers may require System Settings. Permission and read-budget gaps remain visible.": {
       "localizations": {
         "en": {
@@ -37367,6 +37415,22 @@
         }
       }
     },
+    "The operation reached its resource limit. Scan one location or choose a smaller folder.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The operation reached its resource limit. Scan one location or choose a smaller folder."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作已达到资源上限。请单独扫描一个位置，或选择较小的文件夹。"
+          }
+        }
+      }
+    },
     "The operation will stop at a safe boundary. Unstarted items will stay unchanged. Review processed items in History; they are not automatically restored.": {
       "localizations": {
         "en": {
@@ -37925,6 +37989,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "扫描证据或设置已变化，请重新扫描后审阅。"
+          }
+        }
+      }
+    },
+    "The scan reached its folder-depth limit. Choose a smaller folder and scan again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The scan reached its folder-depth limit. Choose a smaller folder and scan again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描已达到目录深度上限。请选择较小的文件夹重新扫描。"
+          }
+        }
+      }
+    },
+    "The scan reached its item limit. Scan this location separately or choose a smaller folder.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The scan reached its item limit. Scan this location separately or choose a smaller folder."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描已达到条目上限。请单独扫描此位置，或选择较小的文件夹。"
+          }
+        }
+      }
+    },
+    "The scan reached its time limit. Scan this location separately or choose a smaller folder.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The scan reached its time limit. Scan this location separately or choose a smaller folder."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描已达到时间上限。请单独扫描此位置，或选择较小的文件夹。"
           }
         }
       }
@@ -38599,6 +38711,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "温度与风扇"
+          }
+        }
+      }
+    },
+    "These files are in use. Close the application and scan again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These files are in use. Close the application and scan again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些文件正被占用。请关闭相关应用后重新扫描。"
           }
         }
       }

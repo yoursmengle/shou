@@ -6,11 +6,17 @@ using Shou.Windows.Platform;
 namespace Shou.Windows.Cli;
 
 /// <summary>Only the current exact plan phrase can create domain consent; the prompt never writes stdout.</summary>
-internal sealed class TerminalCleanupConfirmation(Func<string, CancellationToken, Task<string?>> prompt, string locale) : ICleanupConfirmation
+internal sealed class TerminalCleanupConfirmation(Func<string, CancellationToken, Task<string?>> prompt, string locale,
+    CleanupPlan? expected = null) : ICleanupConfirmation
 {
     public async Task<bool> RequestAsync(CleanupReview review, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (expected is not null && (review.PlanId != expected.Id || review.Digest != expected.Digest ||
+            review.Action != expected.Action || review.ExpiresAt != expected.ExpiresAt || review.Items.IsDefault ||
+            !review.Items.SequenceEqual(expected.Items.Select(item =>
+                new CleanupReviewItem(item.Id, item.Path, item.RuleId, item.Risk, item.AllocatedBytes, item.Manifest.Length)))))
+            throw new ShouException("plan_stale", "The cleanup plan changed before terminal confirmation.");
         var text = new TextCatalog(locale);
         var phrase = (review.Action == CleanupAction.Permanent ? "PURGE " : "TRASH ") + review.PlanId;
         var options = new JsonSerializerOptions(ContractJson.Options) { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };

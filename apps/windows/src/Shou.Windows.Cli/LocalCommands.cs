@@ -1,4 +1,5 @@
 using Shou.Windows.Core;
+using Shou.Windows.Platform;
 
 namespace Shou.Windows.Cli;
 
@@ -71,9 +72,11 @@ internal static class LocalCommands
             }
             case "plan execute":
             {
-                if (!CliServices.MutationAvailable) throw new ShouException("unsupported_capability", "Cleanup execution requires a matching native Windows 11 process. Read the plan and history; no targets were changed.");
+                if (!CliServices.MutationAvailable) throw new ShouException("unsupported_capability", "Rule cleanup requires a native Windows 11 x64 process. Read the plan and history; no targets were changed.");
                 var cleanup = services.Cleanup;
-                var consent = await cleanup.ConfirmAsync(request.Required("plan-id"), new TerminalCleanupConfirmation(WindowsConsolePrompt.ReadAsync, locale), cancellationToken);
+                var plan = await cleanup.PlanAsync(request.Required("plan-id"), cancellationToken);
+                WindowsCleanupMutation.RequirePublicRulePlan(plan);
+                var consent = await cleanup.ConfirmAsync(plan.Id, new TerminalCleanupConfirmation(WindowsConsolePrompt.ReadAsync, locale, plan), cancellationToken);
                 var execution = await cleanup.ExecuteAsync(request.Required("plan-id"), consent, cancellationToken: cancellationToken);
                 return new(execution, execution.State == CleanupExecutionState.Completed ? "success" : execution.State == CleanupExecutionState.Cancelled ? "cancelled" : "partial",
                     execution.State == CleanupExecutionState.Completed ? 0 : execution.State == CleanupExecutionState.Cancelled ? 130 : 6,

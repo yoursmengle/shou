@@ -1,0 +1,19 @@
+{
+  "scope": "fix-windows-partial-scan-cleanup",
+  "verdict": "pass",
+  "checks": [
+    "Partial status remains visible",
+    "Locked generated target remains blocked",
+    "Independent selected target enables permanent deletion",
+    "Recorded completion and stable footer rendered"
+  ],
+  "screenshots": [
+    ".build\\partial-cleanup-desktop\\desktop-e2e-20261029T062105Z-9ef2c5b4505b46d2945196a15fd587c1\\03-partial-selection-ready.png",
+    ".build\\partial-cleanup-desktop\\desktop-e2e-20261029T062105Z-9ef2c5b4505b46d2945196a15fd587c1\\03-cleanup-completion.png"
+  ],
+  "limitations": [
+    "ARM64 and unrelated public mutation gates remain disabled",
+    "Generated fixtures only; no personal-data deletion or installed-app replacement",
+    "English light 1280x800 window inspected; other appearances, accessibility and signed distribution not accepted"
+  ]
+}

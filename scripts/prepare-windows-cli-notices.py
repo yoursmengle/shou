@@ -56,6 +56,11 @@ def prepare(payload, assets, name="shou"):
                 raise ValueError("The Windows App SDK license path escapes its package.")
             shutil.copy2(license_file, output / "WINDOWS-APP-SDK-LICENSE.txt")
         (output / "WINDOWS-APP-SDK-NOTICE.txt").write_text(notice, encoding="utf-8")
+        velopack = next(value for value in restored if value.startswith("Velopack/"))
+        license_source = Path(__file__).resolve().parents[1] / "third-party/velopack/LICENSE"
+        shutil.copy2(license_source, output / "VELOPACK-LICENSE.txt")
+        (output / "VELOPACK-NOTICE.txt").write_text(
+            f"{velopack}\nhttps://github.com/velopack/velopack\nLicense: MIT (VELOPACK-LICENSE.txt).\n", encoding="utf-8")
     print(f"Windows CLI dependency notices prepared: .NET {runtime}, Windows SDK projections {sdk}.")
 
 

@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 using Shou.Windows.Cli;
 using Shou.Windows.Core;
+using Shou.Windows.Platform;
 
 namespace Shou.Windows.Cli.Tests;
 
@@ -9,6 +11,49 @@ public sealed class TerminalConfirmationTests
     private static readonly string PlanId = "plan_" + new string('1', 32);
     private static CleanupReview Review(CleanupAction action = CleanupAction.Permanent) => new(PlanId, "sha256:" + new string('2', 64), action,
         DateTimeOffset.UtcNow + TimeSpan.FromMinutes(1), [new("item_" + new string('3', 32), WindowsPath.Parse("C:/Users/Dev/项目 with spaces/target"), "dev.cache", "high", 8192, 2)]);
+
+    private static CleanupPlan Prepared()
+    {
+        var review = Review(); var item = review.Items[0];
+        var entry = new FileEntry(item.Path, new(1, new string('4', 32), "S-1-5-21-1"), EntryKind.Directory, 0, 8192,
+            DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch);
+        return new(2, review.PlanId, [], new(), "configuration", review.Digest, DateTimeOffset.UtcNow, review.ExpiresAt,
+            review.Action, [new(item.ItemId, "scan", "candidate", item.RuleId, "1.0.0", "target", item.Path,
+                [entry], [], review.Digest, item.AllocatedBytes, 0, item.Risk)], review.Digest);
+    }
+
+    private static CleanupReview Review(CleanupPlan plan) => new(plan.Id, plan.Digest, plan.Action, plan.ExpiresAt,
+        plan.Items.Select(item => new CleanupReviewItem(item.Id, item.Path, item.RuleId, item.Risk, item.AllocatedBytes, item.Manifest.Length)).ToImmutableArray());
+
+    [Fact]
+    public async Task BoundPlanConfirmsItsExactReview()
+    {
+        var plan = Prepared(); var prompts = 0;
+        var confirmation = new TerminalCleanupConfirmation((_, _) => { prompts++; return Task.FromResult<string?>("PURGE " + PlanId); }, "en", plan);
+        Assert.True(await confirmation.RequestAsync(Review(plan), default));
+        Assert.Equal(1, prompts);
+    }
+
+    [Theory]
+    [InlineData("plan")][InlineData("digest")][InlineData("action")][InlineData("expiry")]
+    [InlineData("storage")][InlineData("path")][InlineData("manifest")]
+    public async Task ReplacedPlanCannotReachTheTerminalPrompt(string field)
+    {
+        var plan = Prepared(); var review = Review(plan); var item = review.Items[0]; var prompts = 0;
+        review = field switch
+        {
+            "plan" => review with { PlanId = "plan_" + new string('5', 32) },
+            "digest" => review with { Digest = "sha256:" + new string('5', 64) },
+            "action" => review with { Action = CleanupAction.Trash },
+            "expiry" => review with { ExpiresAt = review.ExpiresAt.AddSeconds(1) },
+            "storage" => review with { Items = [item with { RuleId = "shou.storage-selection" }] },
+            "path" => review with { Items = [item with { Path = item.Path.Append("other") }] },
+            _ => review with { Items = [item with { ManifestEntries = item.ManifestEntries + 1 }] }
+        };
+        var confirmation = new TerminalCleanupConfirmation((_, _) => { prompts++; return Task.FromResult<string?>("PURGE " + PlanId); }, "en", plan);
+        Assert.Equal("plan_stale", (await Assert.ThrowsAsync<ShouException>(() => confirmation.RequestAsync(review, default))).Code);
+        Assert.Equal(0, prompts);
+    }
 
     [Theory]
     [InlineData(CleanupAction.Permanent, "PURGE ", true)]
@@ -102,12 +147,15 @@ public sealed class TerminalConfirmationTests
     }
 
     [Fact]
-    public void DiscoveryDoesNotAdvertiseUnacceptedNativeExecutionAsAvailable()
+    public void DiscoveryAdvertisesOnlyNativeX64RuleCleanup()
     {
+        var available = NativeWindowsSupport.IsSupported && RuntimeInformation.ProcessArchitecture == Architecture.X64;
         var spec = Assert.Single(CommandDiscovery.Matching("plan execute"));
-        Assert.False(spec.Available);
-        Assert.Equal("native_acceptance_pending", spec.UnavailableReason);
-        Assert.False(CliServices.MutationAvailable);
+        Assert.Equal(available, spec.Available);
+        Assert.Equal(available ? null : "native_windows_x64_required", spec.UnavailableReason);
+        Assert.Equal(available, CliServices.MutationAvailable);
         Assert.Equal(!CliServices.MutationAvailable, CommandDiscovery.Help("plan execute").Contains("Unavailable", StringComparison.Ordinal));
+        Assert.False(CliServices.ApplicationUninstallAvailable);
+        Assert.False(CliServices.StartupControlAvailable);
     }
 }

@@ -27,6 +27,16 @@ The environment was Windows 11 Pro x64 (10.0.26200), .NET SDK 10.0.402 and Pytho
 
 Local evidence is under `.build/windows-cloud-20261026/`: `report.html` is the screenshot gallery; `REPORT.md` and `verification.json` index results; `screenshots/` retains original Computer Use images; `raw-evidence/` retains TRX, native/E2E failure receipts and source hashes. Older versions, pre-fix images and build rounds are labeled separately. All public mutation gates remain closed. ARM64 execution, complete permanent deletion, signed installation, updates and full accessibility remain outside this acceptance.
 
+## Generated installer lifecycle acceptance
+
+Run the explicit entry point in an ordinary-user Windows 11 session. Default invocation refuses installation changes; `-SelfTest` only checks boundaries:
+
+```powershell
+pwsh -File scripts/windows/test-installer-fixtures.ps1 -RunGeneratedInstallerFixtures -PublishRoot .build/installer-win-x64/publish -ArtifactsRoot .build/installer-lifecycle
+```
+
+The script creates two versions with a random `Limecloud.ShouAcceptance.<random-id>` identity from the current payload. It accepts no existing product identity, installation root or installer. It installs, replaces and uninstalls only that identity, checking HKCU registration, shortcuts, actual window startup/normal close, the same non-elevated user token, and preserved hashes/ACLs of generated data outside the installation root. Its own app exits normally before installation/uninstall. Failure or unknown outcomes retain evidence rather than recursively removing unknown leftovers. `verification.json`, stage checkpoints, command/installer logs and source/payload hashes are retained separately. x64 results do not establish ARM64 native, clean-system, production signing, SmartScreen or full UI acceptance.
+
 ## Diagnostics
 
 GUI and CLI share `%LOCALAPPDATA%\Shou\Diagnostics\application.jsonl`, retaining the current and previous files at up to 1 MiB each. Versioned JSON events contain timestamps, app/OS versions, architecture, process/session, operation/parent IDs, stage, elapsed time, outcome, counts, error codes, HRESULT, inner Win32 codes and method stacks. Exceptions consumed by presentation state are observed. Partial coverage, cancellation, failure and unfinished operations stay distinct. The suffix of CLI `request_id` after `request_` matches its root operation ID; Smart Cleanup shows a diagnostic reference on failure.

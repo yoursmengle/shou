@@ -11,7 +11,7 @@ public sealed class WindowsDesktopUpdates
     { AllowAutoRedirect = false, UseCookies = false, Credentials = null, AutomaticDecompression = DecompressionMethods.None }) { }
     internal WindowsDesktopUpdates(Func<HttpMessageHandler> handlerFactory) => this.handlerFactory = handlerFactory;
 
-    public async Task<DesktopUpdate> CheckAsync(string currentVersion, string architecture, CancellationToken token)
+    public async Task<DesktopUpdate> CheckAsync(string currentVersion, string architecture, CancellationToken token, bool installed = false)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
         deadline.CancelAfter(TimeSpan.FromSeconds(15));
@@ -35,6 +35,6 @@ public sealed class WindowsDesktopUpdates
                 throw new ShouException("desktop_update_unavailable", "The desktop release metadata exceeded its byte limit.");
             bytes.Write(buffer, 0, count);
         }
-        return DesktopUpdate.Parse(bytes.ToArray(), currentVersion, architecture);
+        return DesktopUpdate.Parse(bytes.ToArray(), currentVersion, architecture, installed);
     }
 }

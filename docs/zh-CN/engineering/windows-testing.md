@@ -27,6 +27,16 @@ Windows 11 x64 的 0.18.0 候选版通过 v5 原生构建与发布启动／正�
 
 本机证据位于 `.build/windows-cloud-20261026/`：`report.html` 为截图画廊，`REPORT.md` 和 `verification.json` 索引结果，`screenshots/` 保留原始 Computer Use 截图，`raw-evidence/` 保留 TRX、专项、E2E 失败与源码摘要。旧版本、修复前和各构建轮次分别标注。全部公开变更门禁保持关闭；本次结果不建立 ARM64 运行、完整永久删除、签名安装、更新或全量辅助功能验收。
 
+## 生成安装器的生命周期验收
+
+普通用户 Windows 11 会话可运行以下显式入口；默认调用拒绝安装变更，`-SelfTest` 只检查边界：
+
+```powershell
+pwsh -File scripts/windows/test-installer-fixtures.ps1 -RunGeneratedInstallerFixtures -PublishRoot .build/installer-win-x64/publish -ArtifactsRoot .build/installer-lifecycle
+```
+
+脚本从当前载荷自行生成随机 `Limecloud.ShouAcceptance.<随机标识>` 的两个版本，不接受现有产品身份、安装根或现成安装器。只安装／覆盖升级／卸载该身份；检查 HKCU 登记、快捷方式、实际窗口正常关闭、同一用户且未提升的令牌，以及根外生成数据的哈希和 ACL 保留。安装／卸载前先正常退出本次自有应用；失败或未知结果保留证据，不递归删除未知残留。`verification.json`、逐阶段 checkpoint、命令／安装日志、源码与载荷摘要分别保存。x64 结果不替代 ARM64 原生、干净系统、生产签名、SmartScreen 或完整界面验收。
+
 ## 诊断日志
 
 GUI 与 CLI 共用 `%LOCALAPPDATA%\Shou\Diagnostics\application.jsonl`，最多保留当前与上一份各 1 MiB。每行是版本化 JSON，包含时间、应用／系统版本、架构、进程与会话、操作编号、父操作、阶段、耗时、状态、数量、错误码、HRESULT、内部异常的 Win32 数字码与方法调用栈。页面状态层消费的异常也记录；部分覆盖、取消、失败和未完成分别呈现。CLI `request_id` 的 `request_` 后缀对应根操作编号；智能清理失败界面显示诊断编号。

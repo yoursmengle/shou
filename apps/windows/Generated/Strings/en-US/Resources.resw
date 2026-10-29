@@ -2226,6 +2226,9 @@
   <data name="s6ea67f029794022bc9d2f49a" xml:space="preserve">
     <value>Download Update</value>
   </data>
+  <data name="s9b2f51734032ce6b86c69253" xml:space="preserve">
+    <value>Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved.</value>
+  </data>
   <data name="sdab8e872ae9468f5457c84fd" xml:space="preserve">
     <value>Draft preview only. Enable the rule and rescan before cleanup.</value>
   </data>
@@ -5424,6 +5427,9 @@
   <data name="sd205d4db914351ae5a6c3636" xml:space="preserve">
     <value>Rule changed; preview again before saving.</value>
   </data>
+  <data name="s8ccf6ae8d3b4317781a5ebb0" xml:space="preserve">
+    <value>Rule cleanup requires a native Windows 11 x64 process.</value>
+  </data>
   <data name="s73c03fea11b74c323b3359ac" xml:space="preserve">
     <value>Rule does not conform to the bundled schema.</value>
   </data>
@@ -6282,6 +6288,9 @@
   <data name="sfe75c1a4d0f76604177ca072" xml:space="preserve">
     <value>Some locations need attention</value>
   </data>
+  <data name="sfa9c3d5bc4de260c7cfbeeaf" xml:space="preserve">
+    <value>Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup.</value>
+  </data>
   <data name="s54caea9119439d0e68e7f93f" xml:space="preserve">
     <value>Some login items and embedded helpers may require System Settings. Permission and read-budget gaps remain visible.</value>
   </data>
@@ -6993,6 +7002,9 @@
   <data name="sb7cd6323428201e18386bb42" xml:space="preserve">
     <value>The official WinGet source could not be verified. Custom sources are not used.</value>
   </data>
+  <data name="s2034f16b408173e812d266a0" xml:space="preserve">
+    <value>The operation reached its resource limit. Scan one location or choose a smaller folder.</value>
+  </data>
   <data name="scbf8ae4da2cbabfe29b3a734" xml:space="preserve">
     <value>The operation will stop at a safe boundary. Unstarted items will stay unchanged. Review processed items in History; they are not automatically restored.</value>
   </data>
@@ -7097,6 +7109,15 @@
   </data>
   <data name="sbcf57908b02c55c05de96174" xml:space="preserve">
     <value>The scan or settings changed. Scan again before reviewing.</value>
+  </data>
+  <data name="s9fa796c65c5c4b15f88a7451" xml:space="preserve">
+    <value>The scan reached its folder-depth limit. Choose a smaller folder and scan again.</value>
+  </data>
+  <data name="s6113aefae52689a413c530aa" xml:space="preserve">
+    <value>The scan reached its item limit. Scan this location separately or choose a smaller folder.</value>
+  </data>
+  <data name="s59ed136e8404eafb96ea7ae7" xml:space="preserve">
+    <value>The scan reached its time limit. Scan this location separately or choose a smaller folder.</value>
   </data>
   <data name="s8ef8b2e966c335d9530510f9" xml:space="preserve">
     <value>The selected API key environment variable is empty.</value>
@@ -7223,6 +7244,9 @@
   </data>
   <data name="saf1bb020334104411d1e2381" xml:space="preserve">
     <value>Thermals &amp; Fans</value>
+  </data>
+  <data name="s4950337f5875e257d0d28c32" xml:space="preserve">
+    <value>These files are in use. Close the application and scan again.</value>
   </data>
   <data name="sc3e61569d474beaaf1a5ad03" xml:space="preserve">
     <value>These files will be permanently removed. This action cannot be undone.</value>

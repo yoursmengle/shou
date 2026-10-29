@@ -741,6 +741,7 @@
 "Done" = "完成";
 "Dot path components are not supported." = "路径中不支持点目录段。";
 "Download Update" = "下载更新";
+"Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved." = "下载安装程序。完成当前操作并退出 Shou 后，再运行安装程序。配置和历史会保留。";
 "Draft preview only. Enable the rule and rescan before cleanup." = "仅预览草稿。启用规则并重新扫描后才能清理。";
 "Draft previews cannot authorize target scans." = "规则草稿预览不能用于目录补扫。";
 "Draft previews cannot be used for cleanup. Enable the rule and scan again." = "草稿预览不能用于清理。请启用规则后重新扫描。";
@@ -1807,6 +1808,7 @@
 "Rule Suggestions" = "规则建议";
 "Rule Versions and Locations" = "版本与位置";
 "Rule changed; preview again before saving." = "规则已变化，请重新预览后再保存。";
+"Rule cleanup requires a native Windows 11 x64 process." = "规则清理需要在 Windows 11 x64 上原生运行。";
 "Rule does not conform to the bundled schema." = "规则不符合内置格式规范。";
 "Rule exceeds the 256 KiB limit." = "规则超过 256 KiB 大小限制。";
 "Rule fields could not be decoded." = "无法读取规则字段。";
@@ -2093,6 +2095,7 @@
 "Some locations could not be read. Sizes show only measured data." = "部分位置无法读取，显示的容量仅包含已统计的数据。";
 "Some locations in this folder need attention." = "当前目录的部分位置需要处理。";
 "Some locations need attention" = "部分位置需要关注";
+"Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup." = "部分位置未能完整扫描。完整且无阻断的项目仍可选择清理。";
 "Some login items and embedded helpers may require System Settings. Permission and read-budget gaps remain visible." = "部分登录项和内嵌辅助程序可能需要在系统设置中管理。权限不足及读取限制会在覆盖情况中列出。";
 "Some paths could not be fully scanned. Only independently verified items can be reviewed for cleanup." = "部分路径未能完整扫描。仅可审阅已独立核验的清理项。";
 "Some privacy sources could not be inspected. Counts cover only available sources." = "部分隐私来源无法检查，数量仅包含可用来源。";
@@ -2330,6 +2333,7 @@
 "The new version stays disabled. Existing bindings keep their version. Preview the new draft, then enable it and scan again." = "新版本默认禁用，现有绑定继续使用原版本。请先预览新草稿，再启用并重新扫描。";
 "The next start will use this exact configuration. Data is not initialized, moved or removed, and no server is started by this action." = "下一次启动将使用此确切配置。本次操作不会初始化、移动或删除数据，也不会启动服务器。";
 "The official WinGet source could not be verified. Custom sources are not used." = "无法核实 WinGet 官方来源。此功能不会使用自定义来源。";
+"The operation reached its resource limit. Scan one location or choose a smaller folder." = "操作已达到资源上限。请单独扫描一个位置，或选择较小的文件夹。";
 "The operation will stop at a safe boundary. Unstarted items will stay unchanged. Review processed items in History; they are not automatically restored." = "操作将在安全边界停止，尚未开始的项目保持原状。已处理内容可在操作记录中查看，不会自动恢复。";
 "The original cleanup match could not be reproduced." = "无法重新核验原清理规则的匹配结果。";
 "The output file already exists. Choose another filename; existing files were preserved." = "目标文件已存在，请使用其他文件名；现有文件已保留。";
@@ -2365,6 +2369,9 @@
 "The scan location could not be inspected." = "无法检查扫描位置。";
 "The scan location is a symbolic link or is not a directory." = "扫描位置是符号链接或不是文件夹。";
 "The scan or settings changed. Scan again before reviewing." = "扫描证据或设置已变化，请重新扫描后审阅。";
+"The scan reached its folder-depth limit. Choose a smaller folder and scan again." = "扫描已达到目录深度上限。请选择较小的文件夹重新扫描。";
+"The scan reached its item limit. Scan this location separately or choose a smaller folder." = "扫描已达到条目上限。请单独扫描此位置，或选择较小的文件夹。";
+"The scan reached its time limit. Scan this location separately or choose a smaller folder." = "扫描已达到时间上限。请单独扫描此位置，或选择较小的文件夹。";
 "The selected API key environment variable is empty." = "所选 API 密钥环境变量为空。";
 "The selected MySQL file cannot be read or has changed. Reload its exact path before saving." = "所选 MySQL 文件无法读取或已变化，请重新载入确切路径后再保存。";
 "The selected application bundle itself." = "当前选择的应用程序包本身。";
@@ -2407,6 +2414,7 @@
 "The upgrade was blocked before installation. Check again before retrying." = "安装开始前已阻止本项升级，请重新检查后再重试。";
 "The versions use different or unsupported formats. Compare them in the app." = "版本格式不同或暂不支持比较，请在应用内核对。";
 "Thermals & Fans" = "温度与风扇";
+"These files are in use. Close the application and scan again." = "这些文件正被占用。请关闭相关应用后重新扫描。";
 "These files will be permanently removed. This action cannot be undone." = "这些文件将永久移除，此操作无法撤销。";
 "These observations describe this check only. Unknown outcomes stay blocked; review History before any confirmed action." = "结果仅反映本次核验。不确定的操作仍被阻止，后续操作须在历史中单独审阅并确认。";
 "This affects the selected live database. Multiple SQL steps are not a transaction; a failure may leave completed changes. This request expires in two minutes and is used once." = "此操作影响当前选中的数据库。多个 SQL 步骤不构成事务，失败时可能已有部分变更。请求两分钟内有效，仅使用一次。";

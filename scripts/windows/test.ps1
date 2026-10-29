@@ -12,6 +12,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "Generated resource check failed: $LASTEXITCODE" }
     & python (Join-Path $SourceRoot 'tests/design/test-design-tokens.py')
     if ($LASTEXITCODE -ne 0) { throw "Design token checks failed: $LASTEXITCODE" }
+    & python (Join-Path $SourceRoot 'tests/npm/test-release-scripts.py')
+    if ($LASTEXITCODE -ne 0) { throw "Release entry checks failed: $LASTEXITCODE" }
     foreach ($Project in @('Core', 'Presentation', 'Platform', 'Cli')) {
         & dotnet test "tests/Shou.Windows.$Project.Tests/Shou.Windows.$Project.Tests.csproj" -c Release -p:RestoreLockedMode=true "-p:ArtifactsPath=$ArtifactsRoot" --logger 'trx' --results-directory (Join-Path $ArtifactsRoot "results/$Project")
         if ($LASTEXITCODE -ne 0) { throw "$Project tests failed: $LASTEXITCODE" }

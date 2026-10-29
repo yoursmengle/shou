@@ -11,6 +11,7 @@ internal static class Program
     {
         try
         {
+            Velopack.VelopackApp.Build().SetAutoApplyOnStartup(false).Run();
             NativeDiagnostics.Initialize();
             using var diagnostic = Shou.Windows.Core.OperationDiagnostics.Start("application.lifetime");
             WinRT.ComWrappersSupport.InitializeComWrappers();

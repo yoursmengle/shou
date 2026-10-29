@@ -3,9 +3,9 @@
         <StackPanel x:Name="PageToolbar" Orientation="Horizontal" Spacing="8">
             <Button Style="{StaticResource ShouToolbarButton}"><FontIcon Glyph="&#xE946;" /><Button.Flyout><Flyout><TextBlock x:Name="Description" MaxWidth="360" TextWrapping="Wrap" /></Flyout></Button.Flyout></Button>
             <Button x:Name="LocationMenuButton" AutomationProperties.AutomationId="cleanup.locations" Style="{StaticResource ShouToolbarButton}"><Button.Flyout><Flyout><StackPanel Spacing="12" Width="420">
-                <ComboBox x:Name="Locations" DisplayMemberPath="Path" HorizontalAlignment="Stretch" />
+                <ComboBox x:Name="Locations" AutomationProperties.AutomationId="cleanup.location" DisplayMemberPath="Path" HorizontalAlignment="Stretch" />
                 <Button x:Name="DiscoverButton" Click="DiscoverLocations" /><Button x:Name="RefreshButton" Click="RefreshLocations" />
-                <Button x:Name="ScanAllButton" Click="ScanAllLocations" /><Button x:Name="ScanButton" Click="ScanLocation" />
+                <Button x:Name="ScanAllButton" Click="ScanAllLocations" /><Button x:Name="ScanButton" AutomationProperties.AutomationId="cleanup.scan-location" Click="ScanLocation" />
             </StackPanel></Flyout></Button.Flyout></Button>
         </StackPanel>
         <ScrollViewer x:Name="LandingScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center"><StackPanel x:Name="StartContent" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="{StaticResource ShouStartSpacing}" MaxWidth="520" Margin="30">
@@ -16,7 +16,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="0">
                     <Button x:Name="StartButton" Click="StartCleanupScan" Style="{StaticResource ShouScanButton}" CornerRadius="6,0,0,6" BorderThickness="0" AutomationProperties.AutomationId="smart.start" />
                     <Border Width="1" Background="{ThemeResource ShouDividerBrush}" />
-                    <Button x:Name="StartMenuButton" Style="{StaticResource ShouBorderedButton}" Padding="10,7" CornerRadius="0,6,6,0" BorderThickness="0" Background="Transparent"><FontIcon Glyph="&#xE70D;" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" /><Button.Flyout><MenuFlyout><MenuFlyoutItem x:Name="CommonScanItem" Click="StartCleanupScan" /><MenuFlyoutItem x:Name="FreeSpaceItem" IsEnabled="False" /><MenuFlyoutItem x:Name="LocationsMenuItem" Click="ShowLocations" /></MenuFlyout></Button.Flyout></Button>
+                    <Button x:Name="StartMenuButton" AutomationProperties.AutomationId="cleanup.start-menu" Style="{StaticResource ShouBorderedButton}" Padding="10,7" CornerRadius="0,6,6,0" BorderThickness="0" Background="Transparent"><FontIcon Glyph="&#xE70D;" FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}" /><Button.Flyout><MenuFlyout><MenuFlyoutItem x:Name="CommonScanItem" Click="StartCleanupScan" /><MenuFlyoutItem x:Name="FreeSpaceItem" IsEnabled="False" /><MenuFlyoutItem x:Name="LocationsMenuItem" AutomationProperties.AutomationId="cleanup.start-locations" Click="ShowLocations" /></MenuFlyout></Button.Flyout></Button>
                 </StackPanel>
             </Border>
             <TextBlock x:Name="StartStatus" AutomationProperties.AutomationId="cleanup.start_status" TextWrapping="Wrap" TextAlignment="Center" Style="{StaticResource ShouCaption}" AutomationProperties.LiveSetting="Polite" />

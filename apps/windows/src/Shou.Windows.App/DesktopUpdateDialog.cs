@@ -49,7 +49,9 @@ internal sealed class DesktopUpdateDialog : ContentDialog
         {
             var architecture = RuntimeInformation.OSArchitecture switch { Architecture.X64 => "x64", Architecture.Arm64 => "arm64", _ => "unsupported" };
             var current = typeof(DesktopUpdateDialog).Assembly.GetName().Version!.ToString(3);
-            var result = await new WindowsDesktopUpdates().CheckAsync(current, architecture, cancellation.Token);
+            var locator = Velopack.Locators.VelopackLocator.Current;
+            var installed = locator.CurrentlyInstalledVersion is not null && !locator.IsPortable;
+            var result = await new WindowsDesktopUpdates().CheckAsync(current, architecture, cancellation.Token, installed);
             if (cancellation.IsCancellationRequested) return;
             update = result;
             content.Children.Clear();
@@ -64,7 +66,8 @@ internal sealed class DesktopUpdateDialog : ContentDialog
                 Text = string.IsNullOrWhiteSpace(result.Notes) ? text.Get("No release notes were provided.") : result.Notes,
                 TextWrapping = TextWrapping.Wrap, IsTextSelectionEnabled = true
             }});
-            AddText("This portable version updates manually. Download the new version, quit Shou, then replace its folder. Your local data stays in place.");
+            AddText(installed ? "Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved." :
+                "This portable version updates manually. Download the new version, quit Shou, then replace its folder. Your local data stays in place.");
             PrimaryButtonText = text.Get("Download Update");
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }

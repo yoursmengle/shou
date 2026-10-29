@@ -1,5 +1,6 @@
 using Shou.Windows.Core;
 using Shou.Windows.Platform;
+using Shou.Windows.Presentation;
 
 namespace Shou.Windows.App;
 
@@ -23,22 +24,7 @@ internal static class ReviewText
         _ => "This item is protected or incomplete."
     });
 
-    public static string Error(TextCatalog text, string? code) => text.Get(code switch
-    {
-        "plan_stale" or "source_changed" => "The scan or settings changed. Scan again before reviewing.",
-        "activity_unknown" or "active_target" => "An application or build tool may be using these files. Close it and scan again.",
-        "tracked_artifact_content" or "artifact_evidence_unavailable" => code!,
-        "permission_denied" or "access_expired" => "Access to this location is unavailable.",
-        "foreign_owner" => "This location is not owned by the current account.",
-        "scan_location_permissions" => "This location's permissions could not be verified.",
-        "unsupported_location" => "Choose a local folder without links.",
-        "store_busy" => "Another operation is using Shou. Try again shortly.",
-        "store_corrupt" => "The saved record could not be verified.",
-        "overlapping_selection" => "The selected items overlap. Choose either a folder or its contents.",
-        "selection_limit" => "Select up to 256 items for one review.",
-        "selection_unavailable" => "This item is protected or incomplete.",
-        _ => "This operation could not be completed. Try again."
-    });
+    public static string Error(TextCatalog text, string? code) => text.Get(ReviewErrorPresentation.MessageKey(code));
 
     public static string ItemState(TextCatalog text, CleanupItemState state) => text.Get(state switch
     {

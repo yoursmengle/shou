@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 using Microsoft.Win32.SafeHandles;
 using Shou.Windows.Core;
@@ -8,9 +9,17 @@ namespace Shou.Windows.Platform;
 /// <summary>Removes only frozen entries through verified parent handles. No path-recursive fallback.</summary>
 public sealed class WindowsCleanupMutation : ICleanupMutation
 {
-    // Native fixture adapters remain testable; public preview entry points stay
-    // closed until the complete platform release acceptance is recorded.
+    // Storage and privacy retain their separate acceptance boundary.
     public static bool PublicExecutionAvailable => false;
+    public static bool PublicRuleCleanupAvailable => NativeWindowsSupport.IsSupported &&
+        RuntimeInformation.ProcessArchitecture == Architecture.X64;
+
+    public static void RequirePublicRulePlan(CleanupPlan plan)
+    {
+        if (!PublicRuleCleanupAvailable || plan.Version != 2 || plan.Action != CleanupAction.Permanent)
+            throw new ShouException("unsupported_capability", "Permanent rule cleanup requires native Windows 11 x64. Storage removal is unavailable.");
+    }
+
     public bool VerifiesMutationManifest => true;
     public bool Supports(CleanupAction action) => action == CleanupAction.Permanent &&
         NativeWindowsSupport.IsSupported;

@@ -78,7 +78,12 @@ with tempfile.TemporaryDirectory(prefix='shou-dotnet-cli-contract-') as director
     assert capabilities['platform'] == 'windows'
     assert capabilities['application_version'].split('+', 1)[0] == expected_version
     assert capabilities['api_version'] == '1.0' and capabilities['rule_schema_version'] == '1.0'
-    assert capabilities['mutation_available'] is False
+    rule_cleanup_available = capabilities['rule_cleanup_available']
+    assert isinstance(rule_cleanup_available, bool)
+    assert capabilities['mutation_available'] is rule_cleanup_available
+    assert not rule_cleanup_available or capabilities['host_supported']
+    assert capabilities['storage_removal_available'] is False
+    assert capabilities['privacy_cleanup_available'] is False
     assert capabilities['application_uninstall_available'] is False
     assert capabilities['startup_control_available'] is False
     assert capabilities['trash_available'] is False
@@ -97,9 +102,14 @@ with tempfile.TemporaryDirectory(prefix='shou-dotnet-cli-contract-') as director
     for command in capabilities['commands']:
         expected = 'network' if command['command'] in network_commands else 'read' if command['command'] in read_commands else 'configuration' if command['command'] in configuration_commands else 'snapshot' if command['command'] in snapshot_commands else 'plan' if command['command'] in plan_commands else 'destructive'
         assert command['side_effect'] == expected
-        assert command['available'] == (command['command'] not in destructive_commands)
-        if command['command'] in destructive_commands:
+        if command['command'] == 'plan execute':
+            assert command['available'] is rule_cleanup_available
+            assert command.get('unavailable_reason') == (None if rule_cleanup_available else 'native_windows_x64_required')
+        elif command['command'] in destructive_commands:
+            assert command['available'] is False
             assert command['unavailable_reason'] == 'native_acceptance_pending'
+        else:
+            assert command['available'] is True
     assert all({'required', 'optional', 'repeated', 'description'} <= item.keys() for item in capabilities['commands'])
     focused = run(['capabilities', '--command', 'rules', '--json'])['data']['commands']
     assert {item['command'] for item in focused} == {name for name in all_commands if name.startswith('rules ')}
@@ -400,13 +410,15 @@ with tempfile.TemporaryDirectory(prefix='shou-dotnet-cli-contract-') as director
         scan = run(['scan', '--workspace', workspace, '--json'])['data']
         assert scan['rules'] == preview['rules'] and scan['candidate_count'] == 1 and scan['preview_only'] is False
         scan_results = run(['scan', 'results', '--scan-id', scan['scan_id'], '--json'])['data']
-        assert scan_results['preview_only'] is False and scan_results['execution_available'] is False
+        assert scan_results['preview_only'] is False and scan_results['execution_available'] is rule_cleanup_available
         selected = scan_results['candidates'][0]['id']
         plan = run(['plan', 'create', '--scan-id', scan['scan_id'], '--candidate', selected, '--mode', 'permanent', '--json'])['data']
         plan_id = plan['id']
         assert plan['action'] == 'permanent' and len(plan['items']) == 1
         assert run(['plan', 'show', '--plan-id', plan_id, '--json'])['data']['digest'] == plan['digest']
-        assert run(['plan', 'execute', '--plan-id', plan_id, '--json'], 8)['error']['code'] == 'unsupported_capability'
+        rejection = run(['plan', 'execute', '--plan-id', plan_id, '--json'], 7 if rule_cleanup_available else 8)
+        assert rejection['error']['code'] == ('confirmation_required' if rule_cleanup_available else 'unsupported_capability')
+        assert target.exists() and cache.read_bytes() == b'fixture bytes'
         assert run(['history', 'list', '--json'])['data']['entries'] == []
         assert run(['plan', 'create', '--scan-id', scan['scan_id'], '--candidate', selected, '--json'], 8)['error']['code'] == 'unsupported_capability'
         draft_candidate = results['candidates'][0]['id']

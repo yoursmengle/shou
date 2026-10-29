@@ -77,6 +77,10 @@ public sealed class CleanupReviewViewModel(ICleanupReviewOperations operations, 
         row.Candidate.AllocatedBytes > long.MaxValue - total ? long.MaxValue : total + row.Candidate.AllocatedBytes);
     public bool IsBusy => State is CleanupReviewState.Loading or CleanupReviewState.Discovering or CleanupReviewState.Scanning or CleanupReviewState.Preparing;
     public bool StopRequested => operation?.IsCancellationRequested == true;
+    public bool IsScanComplete => Batch is { } batch ? batch.State == "complete" :
+        Snapshot is { } snapshot && snapshot.Scan.IsScopeComplete && snapshot.AnalysisIssues.IsEmpty;
+    public ImmutableArray<ScanIssue> CoverageIssues => DiscoveryIssues.AddRange(Batch?.Issues ??
+        (Snapshot is { } snapshot ? snapshot.Scan.Issues.AddRange(snapshot.AnalysisIssues) : []));
     private bool BatchRequiresRescan => Batch?.Issues.Any(issue => issue.Code == "plan_stale") == true;
     public bool CanPreparePlan => !IsBusy && !requiresRescan && !BatchRequiresRescan && SelectedCount > 0;
     public bool HasPrevious => Offset > 0;
@@ -477,8 +481,8 @@ public sealed class CleanupReviewViewModel(ICleanupReviewOperations operations, 
             .OrderBy(row => row.Category, StringComparer.Ordinal).ThenBy(row => row.RuleName, StringComparer.Ordinal)
             .ThenBy(row => row.Candidate.Path.Value, StringComparer.Ordinal).ToImmutableArray();
     }
-    private CleanupReviewState CoverageState() => Batch?.State is "partial" or "cancelled" ? CleanupReviewState.Partial : Snapshot is not { } snapshot ? CleanupReviewState.Empty :
-        snapshot.Scan.IsScopeComplete && snapshot.AnalysisIssues.IsEmpty ? CleanupReviewState.Ready : CleanupReviewState.Partial;
+    private CleanupReviewState CoverageState() => Batch is null && Snapshot is null ? CleanupReviewState.Empty :
+        IsScanComplete ? CleanupReviewState.Ready : CleanupReviewState.Partial;
     private void ClearScan()
     {
         ClearReview();

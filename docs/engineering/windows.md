@@ -141,7 +141,7 @@ Without a workspace, `rules catalog` reads bundled templates only and can be che
 
 `system scan` reinspects discovered directory identities, then checks the discovery revision and registers the batch in one configuration transaction. Conflicts publish no partial registration. Reused locations retain logical references, exclusions and bindings. Scans then run sequentially with shared entry and traversal/classification time budgets; exhausted locations report gaps, and fair scheduling is not implemented. Results contain independent `scans`, `issues`, `state` and the host's cleanup `execution_available`; gaps return partial/exit 6. Registration commits before scanning: cancellation does not undo registered locations or earlier published scans.
 
-WinUI Scan All Locations calls `ScanRegisteredAsync` through the same batch observation orchestration, passing only the exact location IDs listed on the page without discovery or registration. Results aggregate across locations with optional location filters, and stopping preserves earlier saved snapshots. Configuration invalidation or failed plan revalidation clears the reusable batch. [Windows scanning and review](../product/unified-cleanup.md#windows-scanning-and-review) owns states, selection boundaries and flow/sequence diagrams. Categories, filtering, explicit recommendation selection and multi-location plans have source implementations. One current confirmation and all-source preflight share the execution service; execution gates stay disabled.
+WinUI Scan All Locations calls `ScanRegisteredAsync` through the same batch observation orchestration, passing only the exact location IDs listed on the page without discovery or registration. Results aggregate across locations with optional location filters, and stopping preserves earlier saved snapshots. Configuration invalidation or failed plan revalidation clears the reusable batch. [Windows scanning and review](../product/unified-cleanup.md#windows-scanning-and-review) owns states, selection boundaries and flow/sequence diagrams. Categories, filtering, explicit recommendation selection and multi-location plans have source implementations. One current confirmation and all-source preflight share the execution service; rule cleanup is limited to native Windows 11 x64.
 
 Applicable built-ins participate in scans by default. Configuration stores enable/disable preferences by stable rule ID, so disabled preferences survive resource upgrades; definitions always come from the current bundle. Fixed cache locations require exact path mapping; overlapping or ambiguously spelled scopes cannot fall back to generic project templates. Built-in scans still apply source protection, exclusions and coverage checks; tool exceptions remain pending.
 
@@ -270,7 +270,7 @@ sequenceDiagram
 
 ## UI review and history
 
-WinUI source provides storage analysis, cleanup review, cleanup rules and history navigation. **Find Scan Locations** prepares fixed and conventional project directories; users then select one location to scan built-ins and enabled personal rules. Preparation clears old evidence immediately and reloads actual configuration after success or failure. Dispatched registration offers no stop or rollback guarantee; closing the page only suppresses late results. The configuration page refreshes to show built-in preferences. The GUI can scan all configured locations listed on the page and review aggregated categories, rules and paths, retain selections across location filters, explicitly select recommendations and review one multi-location plan. Public execution and native acceptance remain pending.
+WinUI source provides storage analysis, cleanup review, cleanup rules and history navigation. **Find Scan Locations** prepares fixed and conventional project directories; users then select one location to scan built-ins and enabled personal rules. Preparation clears old evidence immediately and reloads actual configuration after success or failure. Dispatched registration offers no stop or rollback guarantee; closing the page only suppresses late results. The configuration page refreshes to show built-in preferences. The GUI can scan all configured locations listed on the page and review aggregated categories, rules and paths, retain selections across location filters, explicitly select recommendations and review one multi-location plan. Rule cleanup is limited to native Windows 11 x64; native acceptance for other hosts and capabilities is recorded separately.
 
 `CleanupReviewViewModel` owns asynchronous state, explicit selection and plan review. App's `NativeReviewOperations` composes Core/Platform and moves service work off the UI thread. The page displays 200 candidates at a time and retains at most 256 manual selections across pages. High-risk items start unselected. Blocked, incomplete, draft, duplicate-scope and overlapping parent/child targets cannot enter the review selection. The page explains blocking reasons while domain services retain final eligibility and fresh validation.
 
@@ -278,7 +278,7 @@ Smart Cleanup and Developer Projects use one window-owned `CleanupReviewViewMode
 
 Changing a single-scan location clears its old selection and plan. Filtering batch observations by location retains selections from other locations. Refresh or configuration changes invalidate all old evidence. New requests isolate late responses, and failed planning requires a fresh scan. Cancelled single-location scans and planning requests do not publish unacknowledged results; batch reads retain previously published snapshots, and mutation attempts retain actual recorded outcomes. Configuration writes follow the persisted-state reconciliation above.
 
-**Review Selected Items** explicitly creates a permanent-action plan and only displays full paths, count, estimated size and risk; it never issues consent. **Clean Permanently** has separate confirmation and execution source; it stays disabled by the shared native-acceptance gate. Review source and presentation tests do not establish native mutation acceptance.
+The footer's **Delete Permanently** is enabled only on native Windows 11 x64 with current complete unblocked selections. The click freezes exact paths, action and estimated capacity, confirms that scope for this call, then performs live revalidation and execution. Independent complete targets remain manually selectable in partial batches; incomplete targets never gain eligibility. State tests do not replace native generated fixtures and real-window acceptance.
 
 History queries 50 recorded summaries per page, with details re-reading and validating the plan. **Check Recorded Locations** only observes exact locations. Recorded results and current observations are displayed separately; unknown or unfinished intent never becomes success because an original path disappeared. Paging and refresh do not merge different query snapshots, and changing records clears old observations. There are no recovery, retry or journal-write controls.
 
@@ -311,15 +311,15 @@ sequenceDiagram
 
 ### File cleanup confirmation and window lifecycle
 
-`CleanupExecutionViewModel` is separate from review state and binds only the current permanent-action plan. App checks `WindowsCleanupMutation.PublicExecutionAvailable`, then uses the same Core service for current confirmation and single-use consent consumption. GUI and CLI read that one disabled gate, with no environment override. `WinUICleanupConfirmation` displays exact plan paths, count, risk and irreversible consequences on the UI thread, defaults to Cancel and rejects a cancelled or no-longer-visible review.
+`CleanupExecutionViewModel` is separate from review state and binds only the current permanent-action plan. App checks `WindowsCleanupMutation.PublicRuleCleanupAvailable` and rejects non-rule plans before confirmation, then uses the same Core service for current confirmation and single-use consent consumption. GUI and CLI enable permanent rule cleanup only on native Windows 11 x64, with no environment override. Ordinary rule services have no storage-removal adapter. `WinUICleanupConfirmation` binds the delete click to the frozen exact scope and checks that the review remains visible on the UI thread, without a second confirmation dialog.
 
 Dispatch clears executable plans, scans and selection; changing scope or leaving the cleanup page is blocked until the task returns. Stop and normal window closing request cooperative cancellation and keep the window waiting. Returned recorded outcomes remain visible even after stop. Forced process termination is outside that guarantee. Existing intent, unknown outcomes and journal failures are never automatically retried. The page retains exact-plan record lookup; absence of a readable record does not prove no mutation. Lookup validates that plan's journal without rewriting state or granting recovery.
 
 ```mermaid
 flowchart TD
-    Plan[Current explicitly selected permanent plan] --> Gate{Shared native-acceptance gate open?}
+    Plan[Current explicitly selected permanent plan] --> Gate{Native x64 rule cleanup available?}
     Gate -->|No| Unavailable[Unavailable without confirmation or execution]
-    Gate -->|Yes| Confirm[Separate native confirmation defaults to Cancel]
+    Gate -->|Yes| Confirm[Delete click confirms this exact scope]
     Confirm -->|Not confirmed| Stop[Retain lookup without executing]
     Confirm -->|Confirmed| Execute[Clear executable state, Core rechecks and journals intent]
     Execute --> Wait[Retain page and window during execution]
@@ -336,10 +336,10 @@ sequenceDiagram
     participant Core as Cleanup service
     participant Store as Private record lease
     participant Native as Windows adapters
-    Note over UI,Native: Gate is disabled, this execution source still requires native acceptance
-    User->>UI: Execute current plan and separately confirm exact scope
+    Note over UI,Native: Rule cleanup requires native Windows 11 x64; other mutation gates stay closed
+    User->>UI: Click permanent delete to confirm the current exact scope
     UI->>Core: Current plan and confirmation interface
-    Core->>UI: UI-thread confirmation defaults to Cancel
+    Core->>UI: Verify this scope and that the page remains visible
     UI-->>Core: Explicit consent for this call
     Core->>Store: Acquire lease, revalidate plan and journal item intent
     Core->>Native: Recheck identity and complete manifest before mutation
@@ -353,7 +353,7 @@ sequenceDiagram
 
 ## Controlled cleanup domain service
 
-Core implements planning, current confirmation and item journal orchestration, verified with in-memory fixtures. The CLI assembles native filesystem, activity and mutation adapters. `plan create` and `plan show` create and read plans; public `plan execute` currently returns `unsupported_capability` (exit `8`) on every host before touching targets. Generated fixtures independently exercise confirmed native actions and item records without opening that gate. Discovery exposes the runtime gate; there is no environment-variable override. Native fixture and interactive UI evidence remain separate acceptance gates. WinUI includes separate confirmation, stop-and-wait, recorded-result lookup and normal-close protection source.
+Core implements planning, current confirmation and item journal orchestration, verified with in-memory fixtures. The CLI assembles native filesystem, activity and mutation adapters. `plan create` and `plan show` create and read plans; public `plan execute` accepts permanent rule plans on native Windows 11 x64. Other hosts and storage plans return `unsupported_capability` (exit `8`) before confirmation. Noninteractive terminals still return `confirmation_required`; generated fixtures validate exact confirmed native actions and item records. Discovery exposes the runtime gate; there is no environment-variable override. Native fixture and interactive UI evidence remain separate acceptance gates. WinUI includes separate confirmation, stop-and-wait, recorded-result lookup and normal-close protection source.
 
 ```powershell
 shou plan create --scan-id "<regular-scan-id>" --candidate "<candidate-id>" --mode permanent --json

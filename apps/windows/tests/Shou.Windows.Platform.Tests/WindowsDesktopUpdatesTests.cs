@@ -36,17 +36,24 @@ public sealed class WindowsDesktopUpdatesTests
         await Assert.ThrowsAsync<ShouException>(() => source.CheckAsync("0.17.0", "x64", default));
     }
 
-    [Fact]
-    public async Task ReturnsValidatedReleaseAndHonorsCancellation()
+    [Theory]
+    [InlineData(false, "x64")]
+    [InlineData(true, "x64")]
+    [InlineData(true, "arm64")]
+    public async Task ReturnsValidatedReleaseAndHonorsCancellation(bool installed, string architecture)
     {
+        var filename = $"Shou-0.18.0-windows-{architecture}" + (installed ? "-Setup.exe" : ".zip");
         var bytes = JsonSerializer.SerializeToUtf8Bytes(new { tag_name = "v0.18.0", draft = false, prerelease = false,
             html_url = "https://github.com/limecloud/shou/releases/tag/v0.18.0", body = "notes",
-            assets = new[] { new { name = "Shou-0.18.0-windows-x64.zip", size = 100,
-                browser_download_url = "https://github.com/limecloud/shou/releases/download/v0.18.0/Shou-0.18.0-windows-x64.zip" } } });
+            assets = new[] { new { name = filename, size = 100,
+                browser_download_url = "https://github.com/limecloud/shou/releases/download/v0.18.0/" + filename } } });
         var source = new WindowsDesktopUpdates(() => new Handler(() => new(HttpStatusCode.OK)
         { Content = new ByteArrayContent(bytes) { Headers = { ContentType = new MediaTypeHeaderValue("application/json") } } }));
-        Assert.True((await source.CheckAsync("0.17.0", "x64", default)).IsNewer);
+        var update = await source.CheckAsync("0.17.0", architecture, default, installed);
+        Assert.True(update.IsNewer);
+        Assert.EndsWith(filename, update.DownloadUrl.AbsoluteUri);
+        await Assert.ThrowsAsync<ShouException>(() => source.CheckAsync("0.17.0", architecture == "x64" ? "arm64" : "x64", default, installed));
         using var cancellation = new CancellationTokenSource(); cancellation.Cancel();
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => source.CheckAsync("0.17.0", "x64", cancellation.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => source.CheckAsync("0.17.0", architecture, cancellation.Token, installed));
     }
 }

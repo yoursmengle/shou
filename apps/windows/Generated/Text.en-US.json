@@ -3709,6 +3709,11 @@
     "resource_id": "s6ea67f029794022bc9d2f49a",
     "text": "Download Update"
   },
+  "Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved.": {
+    "format": "Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved.",
+    "resource_id": "s9b2f51734032ce6b86c69253",
+    "text": "Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved."
+  },
   "Draft preview only. Enable the rule and rescan before cleanup.": {
     "format": "Draft preview only. Enable the rule and rescan before cleanup.",
     "resource_id": "sdab8e872ae9468f5457c84fd",
@@ -9039,6 +9044,11 @@
     "resource_id": "sd205d4db914351ae5a6c3636",
     "text": "Rule changed; preview again before saving."
   },
+  "Rule cleanup requires a native Windows 11 x64 process.": {
+    "format": "Rule cleanup requires a native Windows 11 x64 process.",
+    "resource_id": "s8ccf6ae8d3b4317781a5ebb0",
+    "text": "Rule cleanup requires a native Windows 11 x64 process."
+  },
   "Rule does not conform to the bundled schema.": {
     "format": "Rule does not conform to the bundled schema.",
     "resource_id": "s73c03fea11b74c323b3359ac",
@@ -10469,6 +10479,11 @@
     "resource_id": "sfe75c1a4d0f76604177ca072",
     "text": "Some locations need attention"
   },
+  "Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup.": {
+    "format": "Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup.",
+    "resource_id": "sfa9c3d5bc4de260c7cfbeeaf",
+    "text": "Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup."
+  },
   "Some login items and embedded helpers may require System Settings. Permission and read-budget gaps remain visible.": {
     "format": "Some login items and embedded helpers may require System Settings. Permission and read-budget gaps remain visible.",
     "resource_id": "s54caea9119439d0e68e7f93f",
@@ -11654,6 +11669,11 @@
     "resource_id": "sb7cd6323428201e18386bb42",
     "text": "The official WinGet source could not be verified. Custom sources are not used."
   },
+  "The operation reached its resource limit. Scan one location or choose a smaller folder.": {
+    "format": "The operation reached its resource limit. Scan one location or choose a smaller folder.",
+    "resource_id": "s2034f16b408173e812d266a0",
+    "text": "The operation reached its resource limit. Scan one location or choose a smaller folder."
+  },
   "The operation will stop at a safe boundary. Unstarted items will stay unchanged. Review processed items in History; they are not automatically restored.": {
     "format": "The operation will stop at a safe boundary. Unstarted items will stay unchanged. Review processed items in History; they are not automatically restored.",
     "resource_id": "scbf8ae4da2cbabfe29b3a734",
@@ -11828,6 +11848,21 @@
     "format": "The scan or settings changed. Scan again before reviewing.",
     "resource_id": "sbcf57908b02c55c05de96174",
     "text": "The scan or settings changed. Scan again before reviewing."
+  },
+  "The scan reached its folder-depth limit. Choose a smaller folder and scan again.": {
+    "format": "The scan reached its folder-depth limit. Choose a smaller folder and scan again.",
+    "resource_id": "s9fa796c65c5c4b15f88a7451",
+    "text": "The scan reached its folder-depth limit. Choose a smaller folder and scan again."
+  },
+  "The scan reached its item limit. Scan this location separately or choose a smaller folder.": {
+    "format": "The scan reached its item limit. Scan this location separately or choose a smaller folder.",
+    "resource_id": "s6113aefae52689a413c530aa",
+    "text": "The scan reached its item limit. Scan this location separately or choose a smaller folder."
+  },
+  "The scan reached its time limit. Scan this location separately or choose a smaller folder.": {
+    "format": "The scan reached its time limit. Scan this location separately or choose a smaller folder.",
+    "resource_id": "s59ed136e8404eafb96ea7ae7",
+    "text": "The scan reached its time limit. Scan this location separately or choose a smaller folder."
   },
   "The selected API key environment variable is empty.": {
     "format": "The selected API key environment variable is empty.",
@@ -12038,6 +12073,11 @@
     "format": "Thermals & Fans",
     "resource_id": "saf1bb020334104411d1e2381",
     "text": "Thermals & Fans"
+  },
+  "These files are in use. Close the application and scan again.": {
+    "format": "These files are in use. Close the application and scan again.",
+    "resource_id": "s4950337f5875e257d0d28c32",
+    "text": "These files are in use. Close the application and scan again."
   },
   "These files will be permanently removed. This action cannot be undone.": {
     "format": "These files will be permanently removed. This action cannot be undone.",

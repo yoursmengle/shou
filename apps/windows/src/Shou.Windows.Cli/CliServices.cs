@@ -6,8 +6,7 @@ namespace Shou.Windows.Cli;
 
 internal sealed class CliServices
 {
-    // Enable only after the native mutation, activity, interruption and terminal acceptance evidence is recorded.
-    public static bool MutationAvailable => WindowsCleanupMutation.PublicExecutionAvailable;
+    public static bool MutationAvailable => WindowsCleanupMutation.PublicRuleCleanupAvailable;
     public static bool ApplicationUninstallAvailable => WindowsApplicationUninstallMutation.PublicExecutionAvailable;
     public static bool StartupControlAvailable => WindowsStartupControlMutation.PublicExecutionAvailable;
     public WindowsRecordStore Store { get; } = WindowsRecordStore.ForCurrentUser();
@@ -22,7 +21,7 @@ internal sealed class CliServices
     public CleanupHistoryService History => new(Store, Validator, Files, new StorageScanner(Files), Store.OwnerSid);
 
     public CleanupScanService Preview => new(Store, Validator, new CleanupScanner(Files), Protection, catalog: Catalog);
-    public CleanupService Cleanup => new(Store, Validator, new CleanupScanner(Files), Protection, new WindowsCleanupActivity(), new WindowsCleanupMutation(), catalog: Catalog, storageFiles: Files);
+    public CleanupService Cleanup => new(Store, Validator, new CleanupScanner(Files), Protection, new WindowsCleanupActivity(), new WindowsCleanupMutation(), catalog: Catalog);
     public ScanLocationService Locations => new(Configuration, Catalog, Files, Store.OwnerSid);
     public static ApplicationUninstallReviewer ApplicationReviewer => new(new(new WindowsApplicationInventory()), new WindowsApplicationUninstallInspector(), new WindowsApplicationActivity());
     public ApplicationUninstallPlanner ApplicationPlans => new(Store, ApplicationReviewer, Store.OwnerSid);

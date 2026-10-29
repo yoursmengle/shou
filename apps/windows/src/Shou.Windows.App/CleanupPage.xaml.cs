@@ -115,7 +115,7 @@ public sealed partial class CleanupPage : UserControl, IPageChrome, IDisposable
         EstimatedHeading.Text = text.Get("Estimated Space to Free");
         ToolTipService.SetToolTip(CleanButton, text.Get(execution.ExecutionAvailable
             ? "These files will be permanently removed. This action cannot be undone."
-            : "Cleanup execution is unavailable in this development build."));
+            : "Rule cleanup requires a native Windows 11 x64 process."));
         ReadExecutionButton.Content = text.Get("Read Recorded Result");
         CompletionDetailsButton.Content = text.Get("Details");
         CompletionScanButton.Content = text.Get("Scan Again");
@@ -130,7 +130,7 @@ public sealed partial class CleanupPage : UserControl, IPageChrome, IDisposable
             CloseCompletion(sender, args);
             args.Handled = true;
         };
-        UnavailableNotice.Text = text.Get("Cleanup execution is unavailable in this development build.");
+        UnavailableNotice.Text = text.Get("Rule cleanup requires a native Windows 11 x64 process.");
         CoverageNotice.Message = text.Get("Some locations could not be read. Sizes show only measured data.");
         model.PropertyChanged += Changed;
         execution.PropertyChanged += ExecutionChanged;
@@ -202,15 +202,18 @@ public sealed partial class CleanupPage : UserControl, IPageChrome, IDisposable
             ScanAllButton.IsEnabled = !IsBusy && !model.Workspaces.IsEmpty;
             CancelButton.IsEnabled = execution.IsBusy ? !execution.StopRequested : model.IsBusy && !model.StopRequested && model.State != CleanupReviewState.Discovering;
             Progress.Visibility = IsBusy ? Visibility.Visible : Visibility.Collapsed;
-            var issues = model.DiscoveryIssues.AddRange(model.Batch?.Issues ?? []);
-            CoverageNotice.IsOpen = model.State == CleanupReviewState.Partial || !issues.IsEmpty;
+            var issues = model.CoverageIssues;
+            CoverageNotice.IsOpen = results && !model.IsScanComplete || !issues.IsEmpty;
             CoverageDetailsButton.Visibility = CoverageNotice.IsOpen ? Visibility.Visible : Visibility.Collapsed;
-            CoverageNotice.Message = issues.IsEmpty ? text.Get("Some locations could not be read. Sizes show only measured data.") :
+            var coverageSummary = text.Get(results
+                ? "Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup."
+                : "Some locations could not be read. Sizes show only measured data.");
+            CoverageNotice.Message = issues.IsEmpty ? coverageSummary : coverageSummary + "\n\n" +
                 string.Join("\n\n", issues.Distinct().Take(20).Select(issue => issue.Path.Value + "\n" + ReviewText.Error(text, issue.Code)));
             StartCoverageNotice.IsOpen = !activity && !results && !issues.IsEmpty;
             StartCoverageDetailsButton.Visibility = StartCoverageNotice.IsOpen ? Visibility.Visible : Visibility.Collapsed;
             StartCoverageNotice.Message = CoverageNotice.Message;
-            ScanState.Text = text.Get(model.Batch?.State == "complete" || model.Batch is null && model.Snapshot?.Scan.IsComplete == true ? "Scan Complete" : "Partial Scan");
+            ScanState.Text = text.Get(model.IsScanComplete ? "Scan Complete" : "Partial Scan");
             PreviousButton.IsEnabled = !IsBusy && model.HasPrevious;
             NextButton.IsEnabled = !IsBusy && model.HasNext;
             CleanButton.IsEnabled = !IsBusy && execution.ExecutionAvailable && model.CanPreparePlan;
@@ -379,7 +382,7 @@ public sealed partial class CleanupPage : UserControl, IPageChrome, IDisposable
     private void ShowLocations(object sender, RoutedEventArgs args)
     {
         if (model.NoUsableLocations && DestinationRequested is { } navigate) navigate("configuration");
-        else LocationMenuButton.Flyout.ShowAt(LocationsLink);
+        else LocationMenuButton.Flyout.ShowAt(StartContent.Visibility == Visibility.Visible ? StartMenuButton : LocationMenuButton);
     }
 
     private async void RefreshLocations(object sender, RoutedEventArgs args) => await GuardAsync(model.LoadAsync);

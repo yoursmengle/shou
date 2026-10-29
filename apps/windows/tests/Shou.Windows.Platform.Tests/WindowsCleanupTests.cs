@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 using Shou.Windows.Core;
 using static Shou.Windows.Platform.Tests.WindowsFileSystemTests;
 
@@ -33,6 +34,33 @@ public sealed class WindowsCleanupTests
         fixture.Write("project/target/cache.bin", [1, 2, 3]);
         fixture.Write("project/target/子目录 with spaces/nested.bin", [4, 5, 6]);
         fixture.CreateDirectory("project/target/empty");
+    }
+
+    [WindowsFact]
+    public async Task PublicRuleCapabilityKeepsStorageAndOtherNativeActionsClosed()
+    {
+        using var fixture = new NativeFixture();
+        Populate(fixture);
+        var observed = await Observe(fixture);
+        var plan = new CleanupPlan(2, RecordKey.New("plan"), [new(observed.Item.ScanId, observed.Workspace, [])], new(),
+            RecordKey.New("config"), "sha256:" + new string('0', 64), DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddMinutes(1),
+            CleanupAction.Permanent, [observed.Item], "sha256:" + new string('0', 64));
+        if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
+        {
+            Assert.True(WindowsCleanupMutation.PublicRuleCleanupAvailable);
+            WindowsCleanupMutation.RequirePublicRulePlan(plan);
+        }
+        else
+        {
+            Assert.False(WindowsCleanupMutation.PublicRuleCleanupAvailable);
+            Assert.Equal("unsupported_capability", Assert.Throws<ShouException>(() => WindowsCleanupMutation.RequirePublicRulePlan(plan)).Code);
+        }
+        foreach (var unsupported in new[] { plan with { Version = 3 }, plan with { Action = CleanupAction.Trash } })
+            Assert.Equal("unsupported_capability", Assert.Throws<ShouException>(() => WindowsCleanupMutation.RequirePublicRulePlan(unsupported)).Code);
+        Assert.False(WindowsCleanupMutation.PublicExecutionAvailable);
+        Assert.False(WindowsApplicationUninstallMutation.PublicExecutionAvailable);
+        Assert.False(WindowsStartupControlMutation.PublicExecutionAvailable);
+        Assert.Equal(new byte[] { 1, 2, 3 }, File.ReadAllBytes(Path.Combine(fixture.Root, "project/target/cache.bin")));
     }
 
     [WindowsFact]

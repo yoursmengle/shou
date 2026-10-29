@@ -10,9 +10,11 @@ Automatic discovery may read SYSTEM/Administrators-provisioned roots at exact bu
 
 When scanning cannot start, the landing page shows a short status and an attention link. Paths are disclosed in a bounded flyout; Scan Locations opens the existing configuration page for adding folders. Diagnostics do not occupy the landing task area. Native handle and WinUI regression for this compatibility change remains pending; host logic checks are not native acceptance.
 
-Windows source includes Scan All Locations and Scan Selected Location. All-location scanning uses only the configured locations currently listed on the page; Find Scan Locations remains a separate discovery and registration action. New registrations cannot silently expand an in-flight scan, and removed or changed registrations invalidate the old scope. Only source and Mac-hosted logic/reference checks have passed; native WinUI/system acceptance is pending and cleanup execution remains unavailable.
+Windows includes Scan All Locations and Scan Selected Location. All-location scanning uses only the configured locations currently listed on the page; Find Scan Locations remains a separate discovery and registration action. New registrations cannot silently expand an in-flight scan, and removed or changed registrations invalidate the old scope. Public rule cleanup is limited to a native Windows 11 x64 process; ARM64, storage removal and privacy deletion retain their separate closed gates. Source implementation and actual native acceptance are recorded separately in [SYNC.md](../../SYNC.md).
 
 Locations run sequentially under one entry allowance and monotonic time budget. Each retains its own snapshot and coverage. Exhausted or failed locations report gaps; absent results do not mean empty directories. When a failure leaves entry consumption unknown, the remaining allowance is not reused for later locations. Stopping preserves previously published snapshots without presenting unfinished locations as successful.
+
+Coverage details retain affected paths for batch and single-location scans. File-sharing conflicts advise closing the application before rescanning; time, item/resource and folder-depth limits advise scanning one location or a smaller folder. These reports do not stop other processes, change permissions or relax bounded reading. Partial results explain that complete, unblocked items can still be selected. A completed single-location rule-target scan displays Scan Complete when its declared scope and analysis are complete; it does not claim full-tree measurement.
 
 The page shows observed and total location counts. Results initially span all observed locations, with filters for location, canonical built-in category, rule name and full path. Personal rules have their own category; rule groups and matching results expose tri-state selection. Filters retain selections in other locations and pages, and the footer counts the entire selection. A request selects at most 256 targets. Limit or overlap failures leave a whole group operation unchanged, without truncation.
 
@@ -20,7 +22,7 @@ The page shows observed and total location counts. Results initially span all ob
 
 Review submits the selected `scan_id → candidate_ids` bindings to Core once. Under one configuration lease, Core reinspects every source, rule, complete manifest and activity state, rejecting repeated scans, multiple snapshots of one location, foreign-source candidates, overlapping paths and duplicate file identities. It saves one plan and digest for all locations. Each source binds its root identity and rules, and each item names its source. One current confirmation binds every exact path, action and the same digest; it does not create reusable per-location approvals.
 
-Plan creation and each execution have one shared measured-entry and time budget, using the largest selected source limit for each dimension rather than summing limits by location. Execution preflights every source under one mutation lease before saving any execution intent; each subsequent mutation still rechecks its item and saves item intent first. Stopping prevents further dispatch while retaining returned outcomes. Unknown outcomes stop later items; querying never restores authority. Public execution remains disabled, and simulated checks do not establish real deletion or release readiness.
+Plan creation and each execution have one shared measured-entry and time budget, using the largest selected source limit for each dimension rather than summing limits by location. Execution preflights every source under one mutation lease before saving any execution intent; each subsequent mutation still rechecks its item and saves item intent first. Stopping prevents further dispatch while retaining returned outcomes. Unknown outcomes stop later items; querying never restores authority. GUI and CLI rule-cleanup entry points accept only rule plans on native Windows 11 x64 and reject storage plans before confirmation. Simulated checks do not establish native deletion or release readiness; native regression uses generated temporary fixtures only.
 
 Configuration invalidation, page disposal and newer scans isolate late responses. Failed plan revalidation discards the reusable batch and selection and requires a fresh scan. Scanning, selection, recommendations and review cannot replace current-entry confirmation.
 
@@ -32,9 +34,9 @@ flowchart TD
     Filter --> Select[Manual selection or explicit eligible recommendations]
     Select --> Verify[One lease rechecks all sources, targets and activity]
     Verify --> Plan[One multi-location plan and digest]
-    Plan --> Gate{Public native gate open?}
-    Gate -->|Currently closed| Review[Review only; no execution]
-    Gate -->|Native acceptance complete| Confirm[One current exact-scope confirmation]
+    Plan --> Gate{Native Windows 11 x64 rule plan?}
+    Gate -->|No| Review[Review only; no execution]
+    Gate -->|Yes| Confirm[One current exact-scope confirmation]
     Confirm --> Preflight[Preflight every location under mutation lease]
     Preflight --> Intent[Persist execution and item intent first]
     Intent --> Mutation[Recheck and mutate each item; retain returned outcomes on stop]
@@ -57,8 +59,8 @@ sequenceDiagram
     Core->>Store: Save one plan and digest for every source
     Core-->>UI: All exact paths, action, estimates and expiry
     UI-->>User: Combined review without execution authority
-    Note over UI,Native: Public execution is currently closed, subsequent steps describe the gated service contract
-    opt Native acceptance complete and user confirms current digest
+    Note over UI,Native: Rule cleanup is limited to native Windows 11 x64; other mutation gates remain separate
+    opt Supported rule plan and user confirms current digest
         UI->>Core: Single current confirmation
         Core->>Store: Mutation lease, replay and configuration checks
         Core->>Native: Preflight every selected source and activity

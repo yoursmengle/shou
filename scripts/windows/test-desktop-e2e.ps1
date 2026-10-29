@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory)][string]$PublishRoot,
     [Parameter(Mandatory)][string]$ArtifactsRoot,
-    [ValidateRange(30, 600)][int]$ScanTimeoutSeconds = 240
+    [ValidateRange(30, 600)][int]$ScanTimeoutSeconds = 240,
+    [switch]$SmartCleanupOnly
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -13,6 +14,13 @@ if ([Threading.Thread]::CurrentThread.ApartmentState -ne 'STA') {
     throw 'Run with powershell.exe -NoProfile -STA -File scripts/windows/test-desktop-e2e.ps1 ...'
 }
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Drawing
+Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class ShouDesktopWindow {
+    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr window);
+}
+'@
 $PublishRoot = (Resolve-Path -LiteralPath $PublishRoot).Path
 $ShouApp = Join-Path $PublishRoot 'app/Shou.Windows.App.exe'
 $ShouCli = Join-Path $PublishRoot 'cli/shou.exe'
@@ -25,6 +33,11 @@ $ShouExpectedSteps = @('01-first-run-start-scan', '02-generated-cli-scan-rules-a
     '04-storage-stop', '04-space-analysis-generated-folder', '05-large-files-generated-folder', '05-space-removal', '05-large-file-removal', '06-applications-search',
     '07-startup-search', '08-rules-and-history', '09-privacy-generated-cookie-removal', '10-settings-save-and-reload',
     '11-storage-failure-evidence-and-recovery', '11-retained-integrity-and-log-health')
+if ($SmartCleanupOnly) {
+    $ShouExpectedSteps = @('02-generated-cli-scan-rules-and-plan',
+        '03-ui-generated-smart-results-and-filter', '11-retained-integrity-and-log-health')
+}
+$ShouLockedFixture = $null
 $ShouProcess = $null
 $ShouWindow = $null
 $ShouFailure = $null
@@ -142,6 +155,8 @@ function Close-App {
 }
 function Save-Screenshot([string]$Name) {
     if ($null -eq $ShouWindow) { return }
+    [ShouDesktopWindow]::SetForegroundWindow($ShouProcess.MainWindowHandle) | Out-Null
+    Start-Sleep -Milliseconds 200
     $Bounds = $ShouWindow.Current.BoundingRectangle
     if ($Bounds.Width -le 0 -or $Bounds.Height -le 0) { throw 'No visible window bounds for screenshot.' }
     $Bitmap = [Drawing.Bitmap]::new([int]$Bounds.Width, [int]$Bounds.Height)
@@ -262,12 +277,15 @@ function Choose-Fixture([string]$Page) {
 try {
     $null = New-Item -ItemType Directory -Path $ArtifactsRoot -Force
     New-PrivateDirectory $ShouRun
-    $ShouPayload = Join-Path $ShouRun 'generated-project'
+    # Active build tools can legitimately protect the repository containing ArtifactsRoot.
+    $ShouPayload = if ($SmartCleanupOnly) {
+        Join-Path ([IO.Path]::GetTempPath()) ('shou-smart-cleanup-generated-' + [Guid]::NewGuid().ToString('N'))
+    } else { Join-Path $ShouRun 'generated-project' }
     New-PrivateDirectory $ShouPayload
     New-PrivateDirectory (Join-Path $ShouPayload 'target')
     $ShouCancellationRoot = Join-Path $ShouRun 'cancellation-project'
     New-PrivateDirectory $ShouCancellationRoot
-    for ($Index = 0; $Index -lt 24; $Index++) {
+    for ($Index = 0; -not $SmartCleanupOnly -and $Index -lt 24; $Index++) {
         $Directory = Join-Path $ShouCancellationRoot ('group-{0:D2}' -f $Index)
         New-PrivateDirectory $Directory
         for ($Entry = 0; $Entry -lt 500; $Entry++) {
@@ -277,13 +295,24 @@ try {
     Write-Fixture (Join-Path $ShouPayload 'Cargo.toml') ([Text.Encoding]::UTF8.GetBytes("[package]`nname=`"shou-e2e-generated`"`nversion=`"0.0.0`"`n"))
     Write-Fixture (Join-Path $ShouPayload 'target/cache.bin') ([byte[]]::new(8192))
     Write-Fixture (Join-Path $ShouPayload 'retained.txt') ([Text.Encoding]::UTF8.GetBytes('Generated fixture; must remain unchanged.'))
+    if ($SmartCleanupOnly) {
+        New-PrivateDirectory (Join-Path $ShouPayload 'locked-project')
+        New-PrivateDirectory (Join-Path $ShouPayload 'locked-project/target')
+        Write-Fixture (Join-Path $ShouPayload 'locked-project/Cargo.toml') ([Text.Encoding]::UTF8.GetBytes("[package]`nname=`"shou-locked-generated`"`nversion=`"0.0.0`"`n"))
+        Write-Fixture (Join-Path $ShouPayload 'locked-project/target/locked.bin') ([byte[]]::new(4096))
+    }
     $ShouBefore = @(Get-ChildItem -LiteralPath $ShouPayload -File -Recurse |
         Where-Object { $_.FullName -notlike ((Join-Path $ShouPayload 'target') + '\*') } |
         Get-FileHash -Algorithm SHA256 | Select-Object Path, Hash)
+    if ($SmartCleanupOnly) {
+        $ShouLockedFixture = [IO.FileStream]::new((Join-Path $ShouPayload 'locked-project/target/locked.bin'),
+            [IO.FileMode]::Open, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+    }
     foreach ($Name in @('SHOU_DATA_DIR', 'SHOU_DIAGNOSTICS_DIR')) { $ShouSavedEnvironment[$Name] = [Environment]::GetEnvironmentVariable($Name, 'Process') }
     $env:SHOU_DATA_DIR = Join-Path $ShouRun 'Data'
     $env:SHOU_DIAGNOSTICS_DIR = Join-Path $ShouRun 'Diagnostics'
 
+    if (-not $SmartCleanupOnly) {
     Run-Step '01-first-run-start-scan' {
         Start-App
         Invoke-Control 'smart.start'
@@ -300,6 +329,7 @@ try {
         Assert-That ((Find-Control 'page.cleanup').Current.ItemStatus -notlike 'failed*') 'First-run discovery failed.'
     }
     Close-App
+    }
     Run-Step '02-generated-cli-scan-rules-and-plan' {
         $Workspace = (Run-Cli 'workspace-add' @('workspaces', 'add', '--path', $ShouPayload, '--root-ref', 'developer-workspaces')).data.id
         $Source = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -310,10 +340,19 @@ try {
         Write-Fixture $RuleFile ([Text.Encoding]::UTF8.GetBytes(($Rule | ConvertTo-Json -Depth 20)))
         $null = Run-Cli 'rule-import' @('rules', 'import', '--file', $RuleFile)
         $null = Run-Cli 'rule-enable' @('rules', 'enable', '--rule-id', $Rule.id, '--workspace', $Workspace)
-        $Scan = (Run-Cli 'fixture-scan' @('scan', '--workspace', $Workspace)).data
+        $AllowedScanExit = if ($SmartCleanupOnly) { @(0, 6) } else { @(0) }
+        $Scan = (Run-Cli 'fixture-scan' @('scan', '--workspace', $Workspace) $AllowedScanExit).data
         Assert-That ($Scan.candidate_count -gt 0 -and -not $Scan.preview_only) 'Generated scan has no production candidates.'
-        $Candidates = (Run-Cli 'fixture-results' @('scan', 'results', '--scan-id', $Scan.scan_id)).data.candidates
-        $Candidate = @($Candidates | Where-Object { $_.rule_id -eq $Rule.id })
+        $CandidatePage = (Run-Cli 'fixture-results' @('scan', 'results', '--scan-id', $Scan.scan_id) $AllowedScanExit).data
+        $Candidates = $CandidatePage.candidates
+        $Candidate = @($Candidates | Where-Object { $_.rule_id -eq $Rule.id -and $_.path -eq (Join-Path $ShouPayload 'target') })
+        if ($SmartCleanupOnly) {
+            Assert-That ($CandidatePage.state -eq 'partial') 'Locked generated sibling did not publish partial coverage.'
+            Assert-That (@($CandidatePage.issues | Where-Object code -eq 'active_or_inaccessible').Count -gt 0) 'Generated lock has no specific coverage reason.'
+            $Blocked = @($Candidates | Where-Object { $_.rule_id -eq $Rule.id -and $_.path -eq (Join-Path $ShouPayload 'locked-project/target') })
+            Assert-That ($Blocked.Count -eq 1 -and -not $Blocked[0].complete -and $Blocked[0].state -eq 'blocked') 'Locked target became reviewable.'
+            Assert-That ($Candidate.Count -eq 1 -and $Candidate[0].complete -and $Candidate[0].state -eq 'review') 'Independent generated target lost complete coverage.'
+        }
         Assert-That ($Candidate.Count -eq 1) 'Generated personal rule did not match exactly one target.'
         $Plan = (Run-Cli 'fixture-plan' @('plan', 'create', '--scan-id', $Scan.scan_id, '--candidate', $Candidate[0].id, '--mode', 'permanent')).data
         Assert-That ($Plan.items.Count -eq 1 -and $Plan.action -eq 'permanent') 'Plan differs from the selected generated target.'
@@ -323,8 +362,15 @@ try {
     }
     Run-Step '03-ui-generated-smart-results-and-filter' {
         Start-App
-        Invoke-Control 'smart.start'
+        if ($SmartCleanupOnly) {
+            Invoke-Control 'cleanup.start-menu'
+            Invoke-Control 'cleanup.start-locations'
+            Invoke-Control 'cleanup.scan-location'
+        } else { Invoke-Control 'smart.start' }
         $null = Wait-Page 'cleanup' @('ready', 'partial') $ScanTimeoutSeconds
+        if ($SmartCleanupOnly) {
+            Assert-That ((Find-Control 'page.cleanup').Current.ItemStatus -eq 'partial') 'WinUI did not retain the locked generated sibling coverage gap.'
+        }
         Assert-That (-not (Find-Control 'cleanup.candidates').Current.IsOffscreen) 'Smart scan did not show results.'
         Set-Text 'cleanup.search' $ShouPayload
         $Groups = @(Wait-Until {
@@ -357,8 +403,9 @@ try {
         $Target = Wait-Until { Find-GeneratedCleanupTarget } 'cleared generated cleanup target'
         Assert-That ($Target.GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern).Current.ToggleState -eq [Windows.Automation.ToggleState]::Off) 'Clear Selection retained the generated target.'
         $Target.GetCurrentPattern([Windows.Automation.TogglePattern]::Pattern).Toggle()
+        Assert-That ((Find-Control 'cleanup.execute').Current.IsEnabled) 'Selected complete target did not enable permanent cleanup.'
+        Save-Screenshot '03-partial-selection-ready'
         Invoke-Control 'cleanup.execute'
-        Invoke-Control 'PrimaryButton'
         $null = Wait-Until { -not (Test-Path -LiteralPath (Join-Path $ShouPayload 'target')) } 'confirmed generated target removal' $ScanTimeoutSeconds
         $null = Wait-Until { $Result = Find-Control 'cleanup.result.title' $true; $Result -and -not $Result.Current.IsOffscreen -and
             $Result.Current.ItemStatus -eq 'completed' } 'recorded cleanup completion page'
@@ -379,6 +426,7 @@ try {
         Assert-That ($null -eq $ClosedResult -or $ClosedResult.Current.IsOffscreen) 'Back did not dismiss the completion page.'
 
     }
+    if (-not $SmartCleanupOnly) {
     Run-Step '04-storage-stop' {
         Select-Fixture 'storage' $ShouCancellationRoot
         Invoke-Control 'storage.start'
@@ -591,7 +639,9 @@ with sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True) as db:
         Navigate-Page 'history' @('ready')
         Close-App
     }
+    }
     Run-Step '11-retained-integrity-and-log-health' {
+        if ($null -ne $ShouLockedFixture) { $ShouLockedFixture.Dispose(); $ShouLockedFixture = $null }
         $After = @(Get-ChildItem -LiteralPath $ShouPayload -File -Recurse | Get-FileHash -Algorithm SHA256 | Select-Object Path, Hash)
         Assert-That (($After | ConvertTo-Json -Compress) -eq ($ShouBefore | ConvertTo-Json -Compress)) 'Cleanup changed bytes outside the confirmed generated target.'
         $Events = @(Get-ChildItem -LiteralPath $env:SHOU_DIAGNOSTICS_DIR -Filter 'application.jsonl*' | ForEach-Object { Get-Content -LiteralPath $_.FullName } | ForEach-Object { $_ | ConvertFrom-Json })
@@ -624,6 +674,7 @@ with sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True) as db:
         } catch { [IO.File]::WriteAllText((Join-Path $ShouRun 'ui-tree-error.txt'), $_.Exception.Message) }
     }
 } finally {
+    if ($null -ne $ShouLockedFixture) { $ShouLockedFixture.Dispose(); $ShouLockedFixture = $null }
     if ($null -ne $ShouProcess) {
         try { Close-App } catch {
             $ShouResults.Add([ordered]@{ name = 'cleanup-normal-close'; outcome = 'failed'; error = $_.Exception.Message })
@@ -640,6 +691,8 @@ with sqlite3.connect('file:'+sys.argv[1]+'?mode=ro',uri=True) as db:
         $Files = @(Get-ChildItem -LiteralPath $ShouRun -File -Recurse | Get-FileHash -Algorithm SHA256 | Select-Object Path, Hash)
         [ordered]@{
             schema_version = 1; started_from = $PublishRoot; finished_utc = [DateTime]::UtcNow.ToString('o');
+            scope = $(if ($SmartCleanupOnly) { 'smart-cleanup-only' } else { 'desktop-journeys' });
+            generated_cleanup_root = $ShouPayload;
             os = [Environment]::OSVersion.VersionString; process_architecture = $env:PROCESSOR_ARCHITECTURE;
             app_sha256 = (Get-FileHash -LiteralPath $ShouApp -Algorithm SHA256).Hash;
             cli_sha256 = (Get-FileHash -LiteralPath $ShouCli -Algorithm SHA256).Hash;

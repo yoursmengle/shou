@@ -741,6 +741,7 @@
 "Done" = "Done";
 "Dot path components are not supported." = "Dot path components are not supported.";
 "Download Update" = "Download Update";
+"Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved." = "Download the new installer. Finish current operations and quit Shou before running it. Your configuration and history will be preserved.";
 "Draft preview only. Enable the rule and rescan before cleanup." = "Draft preview only. Enable the rule and rescan before cleanup.";
 "Draft previews cannot authorize target scans." = "Draft previews cannot authorize target scans.";
 "Draft previews cannot be used for cleanup. Enable the rule and scan again." = "Draft previews cannot be used for cleanup. Enable the rule and scan again.";
@@ -1807,6 +1808,7 @@
 "Rule Suggestions" = "Rule Suggestions";
 "Rule Versions and Locations" = "Rule Versions and Locations";
 "Rule changed; preview again before saving." = "Rule changed; preview again before saving.";
+"Rule cleanup requires a native Windows 11 x64 process." = "Rule cleanup requires a native Windows 11 x64 process.";
 "Rule does not conform to the bundled schema." = "Rule does not conform to the bundled schema.";
 "Rule exceeds the 256 KiB limit." = "Rule exceeds the 256 KiB limit.";
 "Rule fields could not be decoded." = "Rule fields could not be decoded.";
@@ -2093,6 +2095,7 @@
 "Some locations could not be read. Sizes show only measured data." = "Some locations could not be read. Sizes show only measured data.";
 "Some locations in this folder need attention." = "Some locations in this folder need attention.";
 "Some locations need attention" = "Some locations need attention";
+"Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup." = "Some locations were not fully scanned. Complete, unblocked items can still be selected for cleanup.";
 "Some login items and embedded helpers may require System Settings. Permission and read-budget gaps remain visible." = "Some login items and embedded helpers may require System Settings. Permission and read-budget gaps remain visible.";
 "Some paths could not be fully scanned. Only independently verified items can be reviewed for cleanup." = "Some paths could not be fully scanned. Only independently verified items can be reviewed for cleanup.";
 "Some privacy sources could not be inspected. Counts cover only available sources." = "Some privacy sources could not be inspected. Counts cover only available sources.";
@@ -2330,6 +2333,7 @@
 "The new version stays disabled. Existing bindings keep their version. Preview the new draft, then enable it and scan again." = "The new version stays disabled. Existing bindings keep their version. Preview the new draft, then enable it and scan again.";
 "The next start will use this exact configuration. Data is not initialized, moved or removed, and no server is started by this action." = "The next start will use this exact configuration. Data is not initialized, moved or removed, and no server is started by this action.";
 "The official WinGet source could not be verified. Custom sources are not used." = "The official WinGet source could not be verified. Custom sources are not used.";
+"The operation reached its resource limit. Scan one location or choose a smaller folder." = "The operation reached its resource limit. Scan one location or choose a smaller folder.";
 "The operation will stop at a safe boundary. Unstarted items will stay unchanged. Review processed items in History; they are not automatically restored." = "The operation will stop at a safe boundary. Unstarted items will stay unchanged. Review processed items in History; they are not automatically restored.";
 "The original cleanup match could not be reproduced." = "The original cleanup match could not be reproduced.";
 "The output file already exists. Choose another filename; existing files were preserved." = "The output file already exists. Choose another filename; existing files were preserved.";
@@ -2365,6 +2369,9 @@
 "The scan location could not be inspected." = "The scan location could not be inspected.";
 "The scan location is a symbolic link or is not a directory." = "The scan location is a symbolic link or is not a directory.";
 "The scan or settings changed. Scan again before reviewing." = "The scan or settings changed. Scan again before reviewing.";
+"The scan reached its folder-depth limit. Choose a smaller folder and scan again." = "The scan reached its folder-depth limit. Choose a smaller folder and scan again.";
+"The scan reached its item limit. Scan this location separately or choose a smaller folder." = "The scan reached its item limit. Scan this location separately or choose a smaller folder.";
+"The scan reached its time limit. Scan this location separately or choose a smaller folder." = "The scan reached its time limit. Scan this location separately or choose a smaller folder.";
 "The selected API key environment variable is empty." = "The selected API key environment variable is empty.";
 "The selected MySQL file cannot be read or has changed. Reload its exact path before saving." = "The selected MySQL file cannot be read or has changed. Reload its exact path before saving.";
 "The selected application bundle itself." = "The selected application bundle itself.";
@@ -2407,6 +2414,7 @@
 "The upgrade was blocked before installation. Check again before retrying." = "The upgrade was blocked before installation. Check again before retrying.";
 "The versions use different or unsupported formats. Compare them in the app." = "The versions use different or unsupported formats. Compare them in the app.";
 "Thermals & Fans" = "Thermals & Fans";
+"These files are in use. Close the application and scan again." = "These files are in use. Close the application and scan again.";
 "These files will be permanently removed. This action cannot be undone." = "These files will be permanently removed. This action cannot be undone.";
 "These observations describe this check only. Unknown outcomes stay blocked; review History before any confirmed action." = "These observations describe this check only. Unknown outcomes stay blocked; review History before any confirmed action.";
 "This affects the selected live database. Multiple SQL steps are not a transaction; a failure may leave completed changes. This request expires in two minutes and is used once." = "This affects the selected live database. Multiple SQL steps are not a transaction; a failure may leave completed changes. This request expires in two minutes and is used once.";

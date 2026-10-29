@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.9169" />
     <PackageReference Include="Microsoft.WindowsPackageManager.ComInterop" Version="1.10.340" />
+    <PackageReference Include="Velopack" Version="1.2.161" />
     <ProjectReference Include="../Shou.Windows.Core/Shou.Windows.Core.csproj" />
     <ProjectReference Include="../Shou.Windows.Platform/Shou.Windows.Platform.csproj" />
     <ProjectReference Include="../Shou.Windows.Presentation/Shou.Windows.Presentation.csproj" />

@@ -2,6 +2,18 @@
 
 English | [简体中文](../zh-CN/product/installation-and-access.md)
 
+## Windows
+
+Choose `Shou-<version>-windows-x64-Setup.exe` or `Shou-<version>-windows-arm64-Setup.exe` for the system architecture. Setup installs for the current user without administrator privileges or a separately installed .NET/Windows App SDK runtime. Open Shou from the Start menu and uninstall it through Windows Installed apps. Availability depends on the actual release attachments; source support does not establish publication.
+
+Program files live in `%LOCALAPPDATA%\Limecloud.Shou`. Configuration, history and diagnostics remain under the separate `%LOCALAPPDATA%\Shou` directory. Replacement upgrades and uninstall preserve that data and its private permissions. Do not redirect installation into an existing Shou data directory.
+
+Check for updates in Settings → About Shou. Installed builds download the newer installer for the matching architecture. Finish or stop ongoing work and quit Shou normally before running Setup. External replacement installation and system uninstall can forcibly terminate a running app; they do not replace in-app stopping and normal exit. Portable ZIPs keep their quit-and-replace workflow; standalone CLI and npm channels have separate lifecycles.
+
+The app runs with the current user's privileges. Installation does not take ownership, widen filesystem permissions or enable unaccepted cleanup/uninstall/startup gates. Inaccessible locations remain coverage gaps. An unsigned preview does not have a trusted Authenticode publisher identity; hashes and successful installation do not establish publisher signing.
+
+## macOS
+
 Install Shou in **Applications** before granting disk access. Open the installed copy and follow **Settings → Installation and CLI → Setup Guide**. The guide appears on first launch and remains available from Settings and scan coverage notices.
 
 ## First use

@@ -2226,6 +2226,9 @@
   <data name="s6ea67f029794022bc9d2f49a" xml:space="preserve">
     <value>下载更新</value>
   </data>
+  <data name="s9b2f51734032ce6b86c69253" xml:space="preserve">
+    <value>下载安装程序。完成当前操作并退出 Shou 后，再运行安装程序。配置和历史会保留。</value>
+  </data>
   <data name="sdab8e872ae9468f5457c84fd" xml:space="preserve">
     <value>仅预览草稿。启用规则并重新扫描后才能清理。</value>
   </data>
@@ -5424,6 +5427,9 @@
   <data name="sd205d4db914351ae5a6c3636" xml:space="preserve">
     <value>规则已变化，请重新预览后再保存。</value>
   </data>
+  <data name="s8ccf6ae8d3b4317781a5ebb0" xml:space="preserve">
+    <value>规则清理需要在 Windows 11 x64 上原生运行。</value>
+  </data>
   <data name="s73c03fea11b74c323b3359ac" xml:space="preserve">
     <value>规则不符合内置格式规范。</value>
   </data>
@@ -6282,6 +6288,9 @@
   <data name="sfe75c1a4d0f76604177ca072" xml:space="preserve">
     <value>部分位置需要关注</value>
   </data>
+  <data name="sfa9c3d5bc4de260c7cfbeeaf" xml:space="preserve">
+    <value>部分位置未能完整扫描。完整且无阻断的项目仍可选择清理。</value>
+  </data>
   <data name="s54caea9119439d0e68e7f93f" xml:space="preserve">
     <value>部分登录项和内嵌辅助程序可能需要在系统设置中管理。权限不足及读取限制会在覆盖情况中列出。</value>
   </data>
@@ -6993,6 +7002,9 @@
   <data name="sb7cd6323428201e18386bb42" xml:space="preserve">
     <value>无法核实 WinGet 官方来源。此功能不会使用自定义来源。</value>
   </data>
+  <data name="s2034f16b408173e812d266a0" xml:space="preserve">
+    <value>操作已达到资源上限。请单独扫描一个位置，或选择较小的文件夹。</value>
+  </data>
   <data name="scbf8ae4da2cbabfe29b3a734" xml:space="preserve">
     <value>操作将在安全边界停止，尚未开始的项目保持原状。已处理内容可在操作记录中查看，不会自动恢复。</value>
   </data>
@@ -7097,6 +7109,15 @@
   </data>
   <data name="sbcf57908b02c55c05de96174" xml:space="preserve">
     <value>扫描证据或设置已变化，请重新扫描后审阅。</value>
+  </data>
+  <data name="s9fa796c65c5c4b15f88a7451" xml:space="preserve">
+    <value>扫描已达到目录深度上限。请选择较小的文件夹重新扫描。</value>
+  </data>
+  <data name="s6113aefae52689a413c530aa" xml:space="preserve">
+    <value>扫描已达到条目上限。请单独扫描此位置，或选择较小的文件夹。</value>
+  </data>
+  <data name="s59ed136e8404eafb96ea7ae7" xml:space="preserve">
+    <value>扫描已达到时间上限。请单独扫描此位置，或选择较小的文件夹。</value>
   </data>
   <data name="s8ef8b2e966c335d9530510f9" xml:space="preserve">
     <value>所选 API 密钥环境变量为空。</value>
@@ -7223,6 +7244,9 @@
   </data>
   <data name="saf1bb020334104411d1e2381" xml:space="preserve">
     <value>温度与风扇</value>
+  </data>
+  <data name="s4950337f5875e257d0d28c32" xml:space="preserve">
+    <value>这些文件正被占用。请关闭相关应用后重新扫描。</value>
   </data>
   <data name="sc3e61569d474beaaf1a5ad03" xml:space="preserve">
     <value>这些文件将永久移除，此操作无法撤销。</value>

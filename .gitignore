@@ -10,3 +10,6 @@ __pycache__/
 apps/windows/**/bin/
 apps/windows/**/obj/
 output/
+codex_no_ask.ps1
+.opencode/
+.pi/

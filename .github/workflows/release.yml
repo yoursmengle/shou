@@ -215,6 +215,11 @@ jobs:
           if ('${{ matrix.runtime }}' -eq 'win-x64') { $Arguments += '--native-checked' }
           python scripts/package-windows.py @Arguments
           if ($LASTEXITCODE -ne 0) { throw 'Windows release archive validation failed.' }
+      - name: Package current-user installer and verify final bytes
+        run: |
+          $Arguments = @{ PublishRoot = "$env:RUNNER_TEMP/ShouBuild/payload/publish"; OutputDirectory = 'dist/windows'; Version = $env:SHOU_RELEASE_TAG.Substring(1); Runtime = '${{ matrix.runtime }}'; SourceCommit = '${{ needs.source.outputs.commit }}' }
+          if ('${{ matrix.runtime }}' -eq 'win-x64') { $Arguments.NativeChecked = $true }
+          ./scripts/windows/package-installer.ps1 @Arguments
       - uses: actions/upload-artifact@v4
         with:
           name: shou-release-windows-${{ matrix.runtime }}
@@ -257,8 +262,7 @@ jobs:
           test "$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHOU_RELEASE_TAG" --jq .sha)" = "$SHOU_SOURCE_COMMIT" || { echo 'Release tag moved; publish the new verified source instead'; exit 1; }
           task_asset_dir="$(dirname "$(find release-assets -name SHA256SUMS -print -quit)")"
           test -f "$task_asset_dir/SHA256SUMS"
-          cp windows-assets/*.zip "$task_asset_dir/"
-          cat windows-assets/SHA256SUMS-windows-* >> "$task_asset_dir/SHA256SUMS"
+          python3 scripts/package-windows.py --collect-release-assets --payload-root windows-assets --output "$task_asset_dir" --version "${SHOU_RELEASE_TAG#v}" --runtime win-x64 --source "$SHOU_SOURCE_COMMIT"
           (cd "$task_asset_dir" && sha256sum -c SHA256SUMS)
           if gh release view "$SHOU_RELEASE_TAG" --json isDraft --jq .isDraft > "$RUNNER_TEMP/shou-release-state" 2>/dev/null; then
             test "$(cat "$RUNNER_TEMP/shou-release-state")" = true || { echo 'Published releases cannot be replaced'; exit 1; }

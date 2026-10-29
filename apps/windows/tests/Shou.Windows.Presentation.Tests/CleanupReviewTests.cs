@@ -69,6 +69,7 @@ public sealed partial class CleanupReviewTests
         if (batch) await model.ScanAllAsync();
         else await model.ScanAsync(Location().Id);
         Assert.Equal(CleanupReviewState.Ready, model.State);
+        Assert.True(model.IsScanComplete);
         Assert.False(model.Snapshot!.Scan.IsComplete);
         model.SetSelected(Candidate(1).Id, true);
         Assert.True(model.CanPreparePlan);
@@ -137,6 +138,40 @@ public sealed partial class CleanupReviewTests
         Assert.False(model.SetSelected(Candidate(2).Id, true));
         Assert.False(model.SetSelected(Id("candidate", 99), true));
         Assert.Equal(1, model.SelectedCount);
+    }
+
+    [Fact]
+    public async Task PartialSingleLocationKeepsExactIssuesAndOnlyPlansCompleteTargets()
+    {
+        var blocked = Candidate(2) with { Complete = false, State = "blocked", BlockedReasons = ["coverage_incomplete"], ManifestDigest = null };
+        var snapshot = Scan([Candidate(1), blocked], partial: true);
+        var scanIssue = new ScanIssue(blocked.Path, "active_or_inaccessible");
+        var analysisIssue = new ScanIssue(Location().Path, "time_limit");
+        snapshot = snapshot with { Scan = snapshot.Scan with { Issues = [scanIssue] }, AnalysisIssues = [analysisIssue] };
+        var operations = new Operations { Result = snapshot };
+        using var model = new CleanupReviewViewModel(operations);
+        await model.LoadAsync(); await model.ScanAsync(Location().Id);
+        Assert.False(model.IsScanComplete);
+        Assert.Equal(new[] { scanIssue, analysisIssue }, model.CoverageIssues);
+        Assert.False(model.SetSelected(blocked.Id, true));
+        Assert.True(model.SetSelected(Candidate(1).Id, true));
+        Assert.True(model.CanPreparePlan);
+        await model.PreparePlanAsync();
+        Assert.Equal(Candidate(1).Id, Assert.Single(model.Plan!.Items).CandidateId);
+        Assert.False(model.IsScanComplete);
+        Assert.Equal(new[] { scanIssue, analysisIssue }, model.CoverageIssues);
+    }
+
+    [Fact]
+    public async Task AnalysisGapDoesNotDisplayACompleteSingleLocationScan()
+    {
+        var snapshot = Scan([Candidate(1)]);
+        snapshot = snapshot with { AnalysisIssues = [new(Location().Path, "time_limit")] };
+        using var model = new CleanupReviewViewModel(new Operations { Result = snapshot });
+        await model.LoadAsync(); await model.ScanAsync(Location().Id);
+        Assert.False(model.IsScanComplete);
+        Assert.Equal(CleanupReviewState.Partial, model.State);
+        Assert.Single(model.CoverageIssues);
     }
 
     [Fact]
